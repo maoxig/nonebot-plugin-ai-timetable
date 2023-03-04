@@ -18,7 +18,7 @@
 
 1. 通过`pip`或`nb`安装；
 
-2. 本地数据保存在`/data/userdata.json`以及`/data/usertable`，分别对应用户发送的链接和本地保存的课表
+2. 本地数据保存在`/data/ai_timetable/userdata.json`以及`/data/ai_timetable/usertable`，分别对应用户发送的链接和本地保存的课表
 
 ## 简介
 
@@ -37,7 +37,7 @@
 
 2. 导入课表：先打开小爱课程表，手动添加或从教务导入课程后
 
-    ![Image text](/blob/main/get_thumbnail.jpg)
+    ![Image text]((https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/get_thumbnail.jpg))
 
     在基本设置里把开始上课时间等调整好之后，把分享课表得到的链接发送给bot即可导入
 
