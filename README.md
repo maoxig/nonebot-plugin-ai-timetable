@@ -1,3 +1,14 @@
+<p align="center">
+  <a href="https://v2.nonebot.dev/"><img src="https://v2.nonebot.dev/logo.png" width="200" height="200" alt="nonebot"></a>
+</p>
+<div align="center">
+
+# nonebot-plugin-ai-timetable
+
+ ✨*基于Nonebot2的对接小爱课表的插件*✨
+
+
+
 # 前言
 
    这是本人第一次在github发布的项目，也是第一个python项目，完全是萌新，很多地方写的可能很拉，大佬轻喷
