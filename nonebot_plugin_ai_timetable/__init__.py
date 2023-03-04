@@ -1,16 +1,16 @@
 import httpx
 import re
-from nonebot_plugin_apscheduler import scheduler
 from .utils import*
-from nonebot_plugin_htmlrender import get_new_page
 from nonebot.plugin import PluginMetadata
 from nonebot.matcher import Matcher
 from nonebot.params import RegexMatched, ArgStr
 from nonebot import on_command, on_regex
 from nonebot.adapters.onebot.v11 import Bot, MessageSegment, MessageEvent, GroupMessageEvent
 from nonebot import require, get_bot
-
 require('nonebot_plugin_htmlrender')
+require('nonebot_plugin_apscheduler')
+from nonebot_plugin_htmlrender import get_new_page
+from nonebot_plugin_apscheduler import scheduler
 logger.opt(colors=True).info(
     "已检测到软依赖<y>nonebot_plugin_apscheduler</y>, <g>开启定时任务功能</g>"
     if scheduler
@@ -34,6 +34,7 @@ add_alock_morningcalss = on_regex(
 remove_alock_someday = on_regex(
     r'^(取消)(订阅|提醒)((周|星期)(一|二|三|四|五|六|日|天))(课程|课表)', priority=20, block=True)
 
+
 @tablehelp.handle()
 async def _(matcher: Matcher, bot: Bot, event: MessageEvent):
     await tablehelp.finish(__usage__)
@@ -41,7 +42,7 @@ __usage__ = "小爱课表帮助:\n#我的/本周课表:获取本周课表,也可
 
 
 @mytable.handle()  # 本/下 周完整课表
-async def _(bot: Bot, event: MessageEvent,key:str=RegexMatched()):
+async def _(bot: Bot, event: MessageEvent, key: str = RegexMatched()):
     uid = event.get_user_id()
     if uid in userdata:
         async with get_new_page(viewport={"width": 1000, "height": 1200}) as page:
@@ -49,7 +50,7 @@ async def _(bot: Bot, event: MessageEvent,key:str=RegexMatched()):
             await page.goto(userdata[uid], wait_until='networkidle')
             # 这里使小爱课程表的导入按钮隐藏，防止遮挡课表
             await page.evaluate('var t = document.querySelector("#root>div>div.importSchedule___UjEKt>div.footer___1iAis.toUp___2mciB"); t.style.display = "none"')
-            if '下' in key:#如果命令中有下字，就点击下一周的按钮
+            if '下' in key:  # 如果命令中有下字，就点击下一周的按钮
                 await page.click("#schedule-view > div.header___26sI1 > div.presentWeek___-o65e > div.rightBtn___2ZhSY")
             pic = await page.screenshot(full_page=True, path="./mytable.png")
             await mytable.finish(MessageSegment.image(pic))
@@ -121,6 +122,7 @@ async def _(matcher: Matcher, bot: Bot, event: GroupMessageEvent, key: str = Reg
         else:
             await add_alock_someday.finish("apscheduler插件未载入，无法添加定时提醒", at_sender=True)
 
+
 @remove_alock_someday.handle()
 async def _(matcher: Matcher, bot: Bot, event: GroupMessageEvent, key: str = RegexMatched()):
     uid = event.get_user_id()
@@ -137,8 +139,8 @@ async def _(matcher: Matcher, bot: Bot, event: GroupMessageEvent, key: str = Reg
                 await remove_alock_someday.finish("出错了,好像没有订阅过这天的课表呢", at_sender=True)
         else:
             await remove_alock_someday.finish("apscheduler插件未载入，无法删除定时提醒", at_sender=True)
-            
-            
+
+
 async def post_alock(*args):
     uid = args[1]
     key = args[0]
