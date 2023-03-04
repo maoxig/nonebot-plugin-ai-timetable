@@ -12,13 +12,13 @@
 # 前言
 
    这是本人第一次在github发布的项目，也是第一个python项目，完全是萌新，很多地方写的可能很拉，大佬轻喷
-目前还不是很完善，有什么bug或者建议欢迎提issue
+目前还不是很完善，有什么bug或者建议欢迎提issues
 
 ## 安装
 
 1. 通过`pip`或`nb`安装；
 
-2. 本地数据保存在`/data/ai_timetable/userdata.json`以及`/data/ai_timetable/usertable`，分别对应用户发送的链接和本地保存的课表
+2. 本地数据保存在`/data/ai_timetable/userdata.json`以及`/data/ai_timetable/usertable.json`，分别对应用户发送的链接和本地保存的课表
 
 ## 简介
 
@@ -37,13 +37,13 @@
 
 2. 导入课表：先打开小爱课程表，手动添加或从教务导入课程后
 
-    ![Image text]((https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/get_thumbnail.jpg))
+    ![Image text](https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/get_thumbnail.jpg)
 
     在基本设置里把开始上课时间等调整好之后，把分享课表得到的链接发送给bot即可导入
 
 3. 订阅/取消订阅某天课表：导入课表后，发送订阅xx课表，如`订阅周一课表`，就可以在这天的前一天晚上10点定时推送第二天要上的课
 
-4. 更新课表；如果在小爱课程表里修改了课程，发送该条指令即可更新本地的课表
+4. 更新课表；如果在小爱课程表里修改了课程，发送该条指令即可更新本地的课表（还没写）
   
 5. 课表帮助
 
