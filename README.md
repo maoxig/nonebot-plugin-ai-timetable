@@ -37,13 +37,15 @@
 
 2. 导入课表：先打开小爱课程表，手动添加或从教务导入课程后
 
-    ![Image text](https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/get_thumbnail.jpg)
+    ![Image text](/blob/main/get_thumbnail.jpg)
 
     在基本设置里把开始上课时间等调整好之后，把分享课表得到的链接发送给bot即可导入
 
 3. 订阅/取消订阅某天课表：导入课表后，发送订阅xx课表，如`订阅周一课表`，就可以在这天的前一天晚上10点定时推送第二天要上的课
 
 4. 更新课表；如果在小爱课程表里修改了课程，发送该条指令即可更新本地的课表
+  
+5. 课表帮助
 
 未完待续
 
@@ -73,3 +75,4 @@ nb plugin install nonebot_plugin_apscheduler
 ```
 
 若不安装nonebot_plugin_htmlrender插件会无法导入在线课表
+ ## 喜欢的话就点个star吧QAQ
