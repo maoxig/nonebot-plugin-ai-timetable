@@ -9,12 +9,12 @@ def log_debug(command: str, info: str):
     logger.opt(colors=True).debug(f'<u><y>[{command}]</y></u>{info}')
 
 
-real_url_re = r'^(https://i\.ai\.mi\.com/course-multi/table\?)*(ctId=)\d+(&userId=)\d*[1-9]\d*(&deviceId=)[0-9a-zA-Z]*(&sourceName=course-app-browser)'
+res_url_re = r'^(https://i\.ai\.mi\.com/course-multi/table\?)*(ctId=)\d+(&userId=)\d*[1-9]\d*(&deviceId=)[0-9a-zA-Z]*(&sourceName=course-app-browser)'
 base_url_re = r'https://cdn\.cnbj1\.fds\.api\.mi-img.com/miai-fe-aischedule-wx-redirect-fe/redirect.html\?linkToken=.+'
-# 写入用户信息
 
 
-def write_data() -> None:
+
+def write_data() -> None:# 写入用户信息
     with open("data/ai_timetable/userdata.json", 'w', encoding='utf-8') as f:
         json.dump(userdata, f)
 
@@ -48,9 +48,10 @@ else:
     usertable = {}
     write_table()
 
-def weekday_int(key)-> int:
-    cn2an = {'今': datetime.datetime.now().weekday()+1, '明': datetime.datetime.now().weekday()+2, '昨': datetime.datetime.now().weekday(), '后': datetime.datetime.now().weekday()+3, '一': 1, '二': 2, '三': 3, '四': 4, '五': 5, '六':6,'日':7,'天':7}
-    for i in cn2an.keys():
+cn2an = {'今': datetime.datetime.now().weekday()+1, '明': datetime.datetime.now().weekday()+2, '昨': datetime.datetime.now().weekday(), '后': datetime.datetime.now().weekday()+3, '一': 1, '二': 2, '三': 3, '四': 4, '五': 5, '六':6,'日':7,'天':7}
+
+def weekday_int(key)-> int:#把中文周数转换成整数
+    for i in cn2an:
         if i in key:
             return cn2an[i]
     return 7
