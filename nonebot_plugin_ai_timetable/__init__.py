@@ -36,6 +36,7 @@ remove_alock_someday = on_regex(
 remove_alock_morningclass=on_command("取消订阅早八",priority=20,block=False,aliases={"取消提醒早八"})
 renew_table=on_command("更新本地课表",priority=20,block=False,aliases={'更新课表'})
 
+
 @tablehelp.handle()
 async def _(matcher: Matcher, bot: Bot, event: MessageEvent):
     await tablehelp.finish(__usage__)
@@ -143,6 +144,7 @@ async def _(matcher: Matcher, bot: Bot, event: GroupMessageEvent, key: str = Reg
             await add_alock_someday.finish("定时提醒添加成功！", at_sender=True)
         else:
             await add_alock_someday.finish("apscheduler插件未载入，无法添加定时提醒", at_sender=True)
+
 
 
 @remove_alock_someday.handle()
