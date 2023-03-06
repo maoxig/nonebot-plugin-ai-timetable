@@ -178,6 +178,23 @@ async def _(matcher:Matcher,bot:Bot,event:GroupMessageEvent):
         else:
             await add_alock_morningcalss.finish("apscheduler插件未载入，无法添加定时提醒喵", at_sender=True)
 
+
+@remove_alock_morningclass.handle()
+async def _(matcher: Matcher, bot: Bot, event: GroupMessageEvent):
+    uid = event.get_user_id()
+    if uid not in userdata:
+        await add_alock_morningcalss.finish('你还没有导入课表，发送\\导入课表来导入吧！', at_sender=True)
+    else:
+        if scheduler:
+            if scheduler.get_job(str(uid+"post_alock_morningclass")):
+                scheduler.remove_job(str(uid+"post_alock_morningclass"))
+                await remove_alock_morningclass.finish("定时提醒删除成功！", at_sender=True)
+            else:
+                await remove_alock_morningclass.finish("出错了,好像没有订阅过早八呢", at_sender=True)
+        else:
+            await remove_alock_morningclass.finish("apscheduler插件未载入，无法删除定时提醒", at_sender=True)
+
+
 async def post_alock(*args):
     uid = args[1]
     key = args[0]
