@@ -5,7 +5,7 @@ from nonebot.plugin import PluginMetadata
 from nonebot.matcher import Matcher
 from nonebot.params import RegexMatched, ArgStr
 from nonebot import on_command, on_regex
-from nonebot.adapters.onebot.v11 import Bot, MessageSegment, MessageEvent, GroupMessageEvent
+from nonebot.adapters.onebot.v11 import Bot, MessageSegment, MessageEvent, GroupMessageEvent,PrivateMessageEvent
 from nonebot import require, get_bot
 require('nonebot_plugin_htmlrender')
 require('nonebot_plugin_apscheduler')
@@ -40,7 +40,7 @@ renew_table=on_command("更新本地课表",priority=20,block=False,aliases={'�
 @tablehelp.handle()
 async def _(matcher: Matcher, bot: Bot, event: MessageEvent):
     await tablehelp.finish(__usage__)
-__usage__ = "小爱课表帮助:\n#我的/本周课表:获取本周课表,也可以是下周\n#导入课表:使用小爱课程表分享的链接一键导入\n#某日课表:获取某日课表，如今日课表、周一课表\n#更新课表:更新本地课表信息\n#订阅/取消订阅xx:可以订阅某天的课表，在前一天晚上10点推送"
+__usage__ = "@小爱课表帮助:\n#我的/本周课表:获取本周课表,也可以是下周\n#导入课表:使用小爱课程表分享的链接一键导入\n#某日课表:获取某日课表，如今日课表、周一课表\n#更新课表:更新本地课表信息\n#订阅/取消订阅xx课表:可以订阅某天(如周一)的课表，在前一天晚上10点推送\n#订阅/取消订阅早八:订阅所有早八，在前一天晚上发出提醒"
 
 
 @mytable.handle()  # 本/下 周完整课表
@@ -128,7 +128,7 @@ async def _(matcher:Matcher,bot:Bot,event:MessageEvent):
 
 
 #-----------以下为定时任务----------------#
-@add_alock_someday.handle()
+@add_alock_someday.handle()#群内订阅课表
 async def _(matcher: Matcher, bot: Bot, event: GroupMessageEvent, key: str = RegexMatched()):
     uid = event.get_user_id()
     gid = event.group_id
@@ -137,17 +137,31 @@ async def _(matcher: Matcher, bot: Bot, event: GroupMessageEvent, key: str = Reg
     else:
         if scheduler:
             send_day = (weekday_int(key)+5) % 7
-            if scheduler.get_job(str(uid+"post_alock"+str(send_day))):
+            if scheduler.get_job(str(uid+"post_alock_group"+str(send_day))):
                 await add_alock_someday.finish("出错了喵！你好像已经订阅过这天的课表了呢", at_sender=True)
             scheduler.add_job(post_alock, "cron", hour=22, id=str(
-                uid+"post_alock"+str(send_day)), args=[key, uid, gid], day_of_week=send_day)
+                uid+"post_alock_group"+str(send_day)), args=[key, uid, gid], day_of_week=send_day)
             await add_alock_someday.finish("定时提醒添加成功！", at_sender=True)
         else:
             await add_alock_someday.finish("apscheduler插件未载入，无法添加定时提醒", at_sender=True)
 
+@add_alock_someday.handle()#私聊订阅课表
+async def _(matcher: Matcher, bot: Bot, event: PrivateMessageEvent, key: str = RegexMatched()):
+    uid = event.get_user_id()
+    if uid not in userdata:
+        await add_alock_someday.finish('你还没有导入课表喵，发送\\导入课表来导入吧！', at_sender=True)
+    else:
+        if scheduler:
+            send_day = (weekday_int(key)+5) % 7
+            if scheduler.get_job(str(uid+"post_alock_private"+str(send_day))):
+                await add_alock_someday.finish("出错了喵！你好像已经订阅过这天的课表了呢", at_sender=True)
+            scheduler.add_job(post_alock, "cron", hour=22, id=str(
+                uid+"post_alock_private"+str(send_day)), args=[key, uid,None], day_of_week=send_day)
+            await add_alock_someday.finish("定时提醒添加成功！", at_sender=True)
+        else:
+            await add_alock_someday.finish("apscheduler插件未载入，无法添加定时提醒", at_sender=True)
 
-
-@remove_alock_someday.handle()
+@remove_alock_someday.handle()#群内删除订阅课表
 async def _(matcher: Matcher, bot: Bot, event: GroupMessageEvent, key: str = RegexMatched()):
     uid = event.get_user_id()
     if uid not in userdata:
@@ -155,32 +169,79 @@ async def _(matcher: Matcher, bot: Bot, event: GroupMessageEvent, key: str = Reg
     else:
         if scheduler:
             send_day = (weekday_int(key)+5) % 7
-            if scheduler.get_job(str(uid+"post_alock"+str(send_day))):
-                scheduler.remove_job(str(uid+"post_alock"+str(send_day)))
+            if scheduler.get_job(str(uid+"post_alock_group"+str(send_day))):
+                scheduler.remove_job(str(uid+"post_alock_group"+str(send_day)))
                 await remove_alock_someday.finish("定时提醒删除成功！", at_sender=True)
             else:
                 await remove_alock_someday.finish("出错了,好像没有订阅过这天的课表呢", at_sender=True)
         else:
             await remove_alock_someday.finish("apscheduler插件未载入，无法删除定时提醒", at_sender=True)
 
-@add_alock_morningcalss.handle()
+@remove_alock_someday.handle()#私聊删除订阅课表
+async def _(matcher: Matcher, bot: Bot, event: PrivateMessageEvent, key: str = RegexMatched()):
+    uid = event.get_user_id()
+    if uid not in userdata:
+        await add_alock_someday.finish('你还没有导入课表，发送\\导入课表来导入吧！', at_sender=True)
+    else:
+        if scheduler:
+            send_day = (weekday_int(key)+5) % 7
+            if scheduler.get_job(str(uid+"post_alock_private"+str(send_day))):
+                scheduler.remove_job(str(uid+"post_alock_private"+str(send_day)))
+                await remove_alock_someday.finish("定时提醒删除成功！", at_sender=True)
+            else:
+                await remove_alock_someday.finish("出错了,好像没有订阅过这天的课表呢", at_sender=True)
+        else:
+            await remove_alock_someday.finish("apscheduler插件未载入，无法删除定时提醒", at_sender=True)
+
+#-----------以下为订阅早八----------------#
+@add_alock_morningcalss.handle()#群聊订阅早八
 async def _(matcher:Matcher,bot:Bot,event:GroupMessageEvent):
     uid=event.get_user_id()
     gid = event.group_id
+    
     if uid not in userdata:
         await add_alock_morningcalss.finish('你还没有导入课表喵，发送\\导入课表来导入吧！', at_sender=True)
     else:
         if scheduler:
-            if scheduler.get_job(str(uid+"post_alock_morningclass")):
+            if scheduler.get_job(str(uid+"post_alock_morningclass_group")):
                 await add_alock_morningcalss.finish("出错了喵！你好像已经订阅过早八提醒了呢", at_sender=True)
-            scheduler.add_job(post_alock_morningclass, "cron", hour=20,id=str(uid+"post_alock_morningclass"), args=[uid, gid])
+            scheduler.add_job(post_alock_morningclass, "cron", hour=21,id=str(uid+"post_alock_morningclass_group"), args=[uid, gid])
+            await add_alock_morningcalss.finish("定时提醒添加成功！", at_sender=True)
+        else:
+            await add_alock_morningcalss.finish("apscheduler插件未载入，无法添加定时提醒喵", at_sender=True)
+
+@add_alock_morningcalss.handle()#私聊订阅早八
+async def _(matcher:Matcher,bot:Bot,event:PrivateMessageEvent):
+    uid=event.get_user_id()
+    if uid not in userdata:
+        await add_alock_morningcalss.finish('你还没有导入课表喵，发送\\导入课表来导入吧！', at_sender=True)
+    else:
+        if scheduler:
+            if scheduler.get_job(str(uid+"post_alock_morningclass_private")):
+                await add_alock_morningcalss.finish("出错了喵！你好像已经订阅过早八提醒了呢", at_sender=True)
+            scheduler.add_job(post_alock_morningclass, "cron", hour=21,id=str(uid+"post_alock_morningclass_private"), args=[uid, None])
             await add_alock_morningcalss.finish("定时提醒添加成功！", at_sender=True)
         else:
             await add_alock_morningcalss.finish("apscheduler插件未载入，无法添加定时提醒喵", at_sender=True)
 
 
-@remove_alock_morningclass.handle()
+@remove_alock_morningclass.handle()#群移除早八
 async def _(matcher: Matcher, bot: Bot, event: GroupMessageEvent):
+    uid = event.get_user_id()
+    if uid not in userdata:
+        await add_alock_morningcalss.finish('你还没有导入课表，发送\\导入课表来导入吧！', at_sender=True)
+    else:
+        if scheduler:
+            if scheduler.get_job(str(uid+"post_alock_morningclass")):
+                scheduler.remove_job(str(uid+"post_alock_morningclass"))
+                await remove_alock_morningclass.finish("定时提醒删除成功！", at_sender=True)
+            else:
+                await remove_alock_morningclass.finish("出错了,好像没有订阅过早八呢", at_sender=True)
+        else:
+            await remove_alock_morningclass.finish("apscheduler插件未载入，无法删除定时提醒", at_sender=True)
+            
+@remove_alock_morningclass.handle()#私聊移除早八
+async def _(matcher: Matcher, bot: Bot, event: PrivateMessageEvent):
     uid = event.get_user_id()
     if uid not in userdata:
         await add_alock_morningcalss.finish('你还没有导入课表，发送\\导入课表来导入吧！', at_sender=True)
@@ -195,19 +256,27 @@ async def _(matcher: Matcher, bot: Bot, event: GroupMessageEvent):
             await remove_alock_morningclass.finish("apscheduler插件未载入，无法删除定时提醒", at_sender=True)
 
 
-async def post_alock(*args):
-    uid = args[1]
+async def post_alock(*args):#发送某天的课表消息
     key = args[0]
-    gid = args[2]
+    uid = args[1]
     if '一' in key:
         key = "明日课表"  # 发送周一课表时是周日，所以要发送的其实是明日课表
     msg = table_msg(key=key, uid=uid)
-    await get_bot().send_group_msg(group_id=gid, message=MessageSegment.at(int(uid))+msg)
+    if not args[2]:
+        send_id = args[1]
+        message_type="private"
+        await get_bot().send_msg(message_type=message_type,user_id=send_id,message=MessageSegment.at(int(uid))+msg)
+    else:
+        message_type="group"
+        send_id=args[2]
+        await get_bot().send_msg(message_type=message_type,group_id=send_id,message=MessageSegment.at(int(uid))+msg)
+
+    
+    
 
 
-async def post_alock_morningclass(*args):
+async def post_alock_morningclass(*args):#发送第二天的早八消息
     uid=args[0]
-    gid=args[1]
     someday=cn2an["明"]
     someweek=int((time.time() - int(
         usertable[uid]["data"]["setting"]['startSemester'][0:10]))//604800)
@@ -224,7 +293,14 @@ async def post_alock_morningclass(*args):
          msg+="\n你明天没有早八呢！享受夜生活吧！"
     else:
         msg+=f"\n你明天有{count}节早八呢！今晚早点休息吧！"
-    await get_bot().send_group_msg(group_id=gid, message=MessageSegment.at(int(uid))+msg)
+    if not args[1]:
+        send_id=uid
+        await get_bot().send_msg(user_id=send_id, message=MessageSegment.at(int(uid))+msg)
+    else:
+        send_id=args[1]
+        await get_bot().send_msg(group_id=send_id, message=MessageSegment.at(int(uid))+msg)
+
+
 
     
 
