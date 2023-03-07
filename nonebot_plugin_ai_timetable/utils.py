@@ -48,9 +48,10 @@ else:
     usertable = {}
     write_table()
 
-cn2an = {'今': datetime.datetime.now().weekday()+1, '明': datetime.datetime.now().weekday()+2, '昨': datetime.datetime.now().weekday(), '后': datetime.datetime.now().weekday()+3, '一': 1, '二': 2, '三': 3, '四': 4, '五': 5, '六':6,'日':7,'天':7}
+
 
 def weekday_int(key)-> int:#把中文周数转换成整数
+    cn2an = {'今': datetime.datetime.now().weekday()+1, '明': datetime.datetime.now().weekday()+2, '昨': datetime.datetime.now().weekday(), '后': datetime.datetime.now().weekday()+3, '一': 1, '二': 2, '三': 3, '四': 4, '五': 5, '六':6,'日':7,'天':7}
     for i in cn2an:
         if i in key:
             return cn2an[i]
@@ -60,7 +61,7 @@ def weekday_int(key)-> int:#把中文周数转换成整数
         
 def table_msg(key,uid)->str:
     presentweek = int((time.time() - int(
-        usertable[uid]["data"]["setting"]['startSemester'][0:10]))//604800)+1  # 这里算出的结果是小数，转换成整数
+        usertable[uid]["data"]["setting"]['startSemester'][0:10]))//604800)+1  # 这里算出的结果是小数,转换成整数
     someday = weekday_int(key)
     # 日期变时周数也会变
     if someday < 0:
@@ -71,20 +72,56 @@ def table_msg(key,uid)->str:
         presentweek += 1
         # 构造发送的信息
     msg = '你要的课表来咯喵:\n'
-    for i in range(len(usertable[uid]["data"]["courses"])):
-        if(usertable[uid]["data"]["courses"][i]["day"] == someday) and (str(presentweek) in usertable[uid]["data"]["courses"][i]["weeks"].split(',')):
-            sections = usertable[uid]["data"]["courses"][i]["sections"].split(
-                ",")
-            startsection = int(sections[0])
-            endsection = int(sections[-1])
+    for courses in usertable[uid]["data"]["courses"]:
+        if(courses["day"] == someday) and (str(presentweek) in courses["weeks"].split(',')):
+            sections=courses["sections"].split(",")
+            startsection=int(sections[0])
+            endsection=int(sections[-1])
             starttime = eval(usertable[uid]["data"]["setting"]["sectionTimes"])[
                 startsection-1]["s"]
             endtime = eval(usertable[uid]["data"]["setting"]["sectionTimes"])[
                 endsection-1]["e"]
-            msg = msg+'\n'+'#'+starttime+'-'+endtime+'\n' + \
-                usertable[uid]["data"]["courses"][i]["name"] + '\n@' + \
-                usertable[uid]["data"]["courses"][i]["position"]
+            msg = msg+'\n'+'#'+starttime+'-'+endtime+'\n'+courses["name"]+"\n@"+courses["position"]
     return msg            
 
+def now_class(uid)->str:#这里构造出当前课程的信息
+    presentweek = int((time.time() - int(
+    usertable[uid]["data"]["setting"]['startSemester'][0:10]))//604800)+1
+    today= weekday_int("今")
+    now_section=0
+    now_time=datetime.datetime.now().strftime("%H:%M")
+    msg=""
+    for course_time in  eval(usertable[uid]["data"]["setting"]["sectionTimes"]):
+            if course_time["s"]<now_time<course_time["e"]:
+                now_section=course_time["i"]
+    if now_section:
+        count=0
+        for courses in usertable[uid]["data"]["courses"]:
+            if (str(presentweek) in courses["weeks"].split(",")) and (today==courses["day"]) and (str(now_section) in courses["sections"].split(",")):
+                    msg+="\n你现在在上的课程信息如下喵:\n"+courses["name"]+"\n@"+courses["position"]+"\n"+courses["teacher"]
+                    count+=1
+        if not count:
+            msg+="\n你现在没有课呢,空闲时间好好休息吧喵~"
+        else:
+            pass
+                       
+    else:
+        msg+="\n你现在没有课呢,空闲时间好好休息吧喵~"
+    return msg
 
-
+              
+    
+    
+def next_class(uid)->str:
+    now_time=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    presentweek = int((time.time() - int(
+    usertable[uid]["data"]["setting"]['startSemester'][0:10]))//604800)+1
+    today= weekday_int("今")
+    for courses in usertable[uid]["data"]["courses"]:
+        if str(presentweek) in courses["weeks"].split(",") and today==courses["day"] :#遍历当前天的所有存在的课
+            next_class_section=int(courses["sections"].split(",")[0])
+            if eval(usertable[uid]["data"]["setting"]["sectionTimes"])[next_class_section-1]["s"]>now_time:
+                return "\n你今天接下来的课程信息为：\n"+courses["name"]+"\n@"+courses["position"]+"\n"+courses["teacher"]
+            #这里是因为之前已经按照顺序排好了课程,所以第一个找到的就是下节课
+    return "\n你今天接下来没有课了呢,好好享受吧喵~"
+                
