@@ -113,15 +113,16 @@ def now_class(uid)->str:#这里构造出当前课程的信息
     
     
 def next_class(uid)->str:
-    now_time=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    now_time=datetime.datetime.now().strftime("%H:%M")
     presentweek = int((time.time() - int(
     usertable[uid]["data"]["setting"]['startSemester'][0:10]))//604800)+1
     today= weekday_int("今")
     for courses in usertable[uid]["data"]["courses"]:
         if str(presentweek) in courses["weeks"].split(",") and today==courses["day"] :#遍历当前天的所有存在的课
             next_class_section=int(courses["sections"].split(",")[0])
+            next_class_section_end=int(courses["sections"].split(",")[-1])
             if eval(usertable[uid]["data"]["setting"]["sectionTimes"])[next_class_section-1]["s"]>now_time:
-                return "\n你今天接下来的课程信息为：\n"+courses["name"]+"\n@"+courses["position"]+"\n"+courses["teacher"]
+                return "\n你今天的下一节课程信息为：\n"+eval(usertable[uid]["data"]["setting"]["sectionTimes"])[next_class_section-1]["s"]+"-"+eval(usertable[uid]["data"]["setting"]["sectionTimes"])[next_class_section_end-1]["e"]+"\n"+courses["name"]+"\n@"+courses["position"]+"\n"+courses["teacher"]
             #这里是因为之前已经按照顺序排好了课程,所以第一个找到的就是下节课
     return "\n你今天接下来没有课了呢,好好享受吧喵~"
                 
