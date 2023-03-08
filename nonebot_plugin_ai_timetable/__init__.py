@@ -19,20 +19,20 @@ logger.opt(colors=True).info(
 __plugin_meta__ = PluginMetadata(
     name="小爱课表",
     description="一键导入课表、查看课表、提醒上课、查询课程",
-    usage="课表帮助",
+    usage="请发送/课表帮助以获取详细信息",
 )
 mytable = on_regex(r'^(小爱|我的|本周|下周)(课表)', priority=20, block=False)
 newtable = on_command('导入课表', priority=20, block=False, aliases={'创建课表'})
 tablehelp = on_command("课表帮助", priority=20, block=False,
                        aliases={"课表介绍", "课表怎么用"})
 someday_table = on_regex(
-    r'^(((今|明|昨|后)(天|日))|(星期|周)(一|二|三|四|五|六|日|天))(课表|课程|((上|有)(什么|啥)课))', priority=20, block=False)
+    r'^(((今|明|昨|后)(天|日))|(星期|周)(一|二|三|四|五|六|日|天))(课表|的课|课程|((上|有)(什么|啥)课))', priority=20, block=False)
 add_alock_someday = on_regex(
-    r'^(订阅|提醒)((周|星期)(一|二|三|四|五|六|日|天))(课程|课表)', priority=20, block=False)
+    r'^(订阅|提醒)((周|星期)(一|二|三|四|五|六|日|天))(课程|课表|的课)', priority=20, block=False)
 add_alock_morningcalss = on_regex(
     r'^(订阅|提醒)早八', priority=20, block=False)
 remove_alock_someday = on_regex(
-    r'^(取消)(订阅|提醒)((周|星期)(一|二|三|四|五|六|日|天))(课程|课表)', priority=20, block=False)
+    r'^(取消)(订阅|提醒)((周|星期)(一|二|三|四|五|六|日|天))(课程|的课|课表)', priority=20, block=False)
 remove_alock_morningclass=on_command("取消订阅早八",priority=20,block=False,aliases={"取消提醒早八"})
 renew_table=on_command("更新本地课表",priority=20,block=False,aliases={'更新课表'})
 send_next_class=on_command("上课",priority=20,block=False,aliases={"下节课"})
@@ -40,7 +40,7 @@ send_next_class=on_command("上课",priority=20,block=False,aliases={"下节课"
 @tablehelp.handle()
 async def _(matcher: Matcher, bot: Bot, event: MessageEvent):
     await tablehelp.finish(__usage__)
-__usage__ = "@小爱课表帮助:\n#我的/本周课表:获取本周课表,也可以是下周\n#导入课表:使用小爱课程表分享的链接一键导入\n#某日课表:获取某日课表,如今日课表、周一课表\n#更新课表:更新本地课表信息\n#订阅/取消订阅xx课表:可以订阅某天(如周一)的课表,在前一天晚上10点推送\n#订阅/取消订阅早八:订阅所有早八,在前一天晚上发出提醒\n#上课/下节课:获取当前课程信息以及今天内的下节课"
+__usage__ = "@小爱课表帮助:\n#我的/本周课表:获取本周课表,也可以是下周\n#导入课表:使用小爱课程表分享的链接一键导入\n#某日课表:获取某日课表,如今日课表、周一课表\n#更新课表:更新本地课表信息,如果线上修改过小爱课表,发送该指令即可更新本地课表\n#订阅/取消订阅xx课表:可以订阅某天(如周一)的课表,在前一天晚上10点推送\n#订阅/取消订阅早八:订阅所有早八,在前一天晚上发出提醒\n#上课/下节课:获取当前课程信息以及今天以内的下节课信息"
 
 
 @mytable.handle()  # 本/下 周完整课表
@@ -85,7 +85,7 @@ async def _(matcher: Matcher, bot: Bot, event: MessageEvent, key: str = ArgStr()
                 res = await r.get(res_url)
                 usertable.update({uid: res.json()})
                 usertable[uid]["data"]["courses"].sort(
-                    key=lambda x: int(x["sections"][0]))  # 这里要对课表排序,否则打印课表时不会按时间顺序来
+                    key=lambda x: int(x["sections"].split(",")[0]))  # 这里要对课表排序,否则打印课表时不会按时间顺序来
                 write_table()
         if uid in userdata:  # 这里保存的是小爱课程表分享的链接,就可以定时通过这里的链接更新本地课表,但是还不清楚链接是否会失效
             userdata.update({uid: url})
@@ -105,7 +105,8 @@ async def _(matcher: Matcher, bot: Bot, event: MessageEvent, key: str = RegexMat
     if uid not in userdata:
         await someday_table.finish('你还没有导入课表喵,发送\\导入课表来导入吧！', at_sender=True)
     else:
-        await someday_table.finish(table_msg(key, uid), at_sender=True)
+        msg=await table_msg(key,uid)
+        await someday_table.finish(msg, at_sender=True)
 
 @renew_table.handle()#更新本地课表
 async def _(matcher:Matcher,bot:Bot,event:MessageEvent):
@@ -122,7 +123,7 @@ async def _(matcher:Matcher,bot:Bot,event:MessageEvent):
                 res = await r.get(res_url)
                 usertable.update({uid: res.json()})
                 usertable[uid]["data"]["courses"].sort(
-                    key=lambda x: int(x["sections"][0]))  # 这里要对课表排序,否则打印课表时不会按时间顺序来
+                    key=lambda x: int(x["sections"].split(",")[0]))  # 这里要对课表排序,否则打印课表时不会按时间顺序来
                 write_table()
         await renew_table.finish("本地课表已更新喵！", at_sender=True)
 
@@ -133,7 +134,8 @@ async def _(matcher: Matcher, bot: Bot, event: MessageEvent):
         await send_next_class.finish('你还没有导入课表喵,发送\\导入课表来导入吧！', at_sender=True)
     else:        
         msg="现在时间是"+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        msg+=now_class(uid)+next_class(uid)
+        msg+=await now_class(uid)
+        msg+=await next_class(uid)
         await send_next_class.finish(msg,at_sender=True)
     
 #-----------以下为定时任务----------------#
@@ -270,7 +272,7 @@ async def post_alock(*args):#发送某天的课表消息
     uid = args[1]
     if '一' in key:
         key = "明日课表"  # 发送周一课表时是周日,所以要发送的其实是明日课表
-    msg = table_msg(key=key, uid=uid)
+    msg = await table_msg(key=key, uid=uid)
     if not args[2]:
         send_id = args[1]
         message_type="private"

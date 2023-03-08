@@ -34,15 +34,36 @@
     暂无，以后可能慢慢增加
     ```
 
+## 依赖
+
+```python
+nb plugin install nonebot_plugin_htmlrender
+nb plugin install nonebot_plugin_apscheduler
+```
+
+若不安装nonebot_plugin_htmlrender插件会无法导入在线课表
+
 ## 更新日志
 
-- 2023-03-05:修复了无法取消订阅早八的bug
-- 2023-03-06:新增了私聊订阅课表|早八的功能
+- 2023-03-05:
+
+    修复了无法取消订阅早八的bug
+
+- 2023-03-06:
+  
+    新增了私聊订阅课表|早八的功能
+
 - 2023-03-07:
 
 1. 修复了时间不会自己改变的bug
 2. 新增了上课/下节课 功能
 3. 优化了一些屎山代码
+
+- 2023-03-08:
+
+1. 修改部分代码，优化课表格式
+
+2. 修复了节数为11的课会排在节数为2的课程前面的bug(QAQ太蠢了别骂了别骂了)
 
 ## 命令
 
@@ -50,7 +71,7 @@
 
 2. 导入课表：需要有小爱课表分享出来的链接，打开小爱课程表，手动添加课程或从教务导入(已适配了大部分高校)课程后
 
-    ![Image text](https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/get_thumbnail.jpg)
+    ![Image text](https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/export.jpg)
 
     在基本设置里把开始上课时间等调整好之后(尤其是时间、节数)，把分享课表得到的链接发送给bot即可导入本地
   
@@ -67,6 +88,26 @@
 8. 课表帮助：获取课表帮助
 
 未完待续
+
+## 效果图
+
+![Image text](https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/resource/my_table.jpg)
+![Image text](https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/resource/alock_8.jpg)
+![Image text](https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/resource/next_class.jpg)
+![Image text](https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/resource/someday_classes.jpg)
+
+### 关于小爱课程表内的一些说明
+
+如下图
+
+- 设置好开始上课时间
+- 设置好课程时间，可以修改每节课具体的时间，
+- 课表节数按自己需求调，一般教务导入的课表节数可能不符合实际，需要微调
+- 每周起始日建议默认的周一即可（周日起始没测试过可能有bug）
+- 如果导入课表后在小爱课表内修改了课程，直接给bot发送更新课表即可更新本地课表
+- 当你主页的课表和学校课表基本一致时，那么小爱课程表就被调教好了，可以导入了
+
+![Image text](https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/resource/settings.jpg)
 
 ## 计划
 
@@ -86,13 +127,4 @@
 
  2. 机器人重启后定时任务会丢失
 
-## 依赖
-
-```python
-nb plugin install nonebot_plugin_htmlrender
-nb plugin install nonebot_plugin_apscheduler
-```
-
-若不安装nonebot_plugin_htmlrender插件会无法导入在线课表
-
-## 喜欢的话就点个stars吧QAQ
+## 喜欢的话就点个star吧QAQ

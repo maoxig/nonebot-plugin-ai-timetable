@@ -56,10 +56,10 @@ def weekday_int(key)-> int:#把中文周数转换成整数
         if i in key:
             return cn2an[i]
     return 7
-    
+
     
         
-def table_msg(key,uid)->str:
+async def table_msg(key,uid)->str:
     presentweek = int((time.time() - int(
         usertable[uid]["data"]["setting"]['startSemester'][0:10]))//604800)+1  # 这里算出的结果是小数,转换成整数
     someday = weekday_int(key)
@@ -81,10 +81,10 @@ def table_msg(key,uid)->str:
                 startsection-1]["s"]
             endtime = eval(usertable[uid]["data"]["setting"]["sectionTimes"])[
                 endsection-1]["e"]
-            msg = msg+'\n'+'#'+starttime+'-'+endtime+'\n'+courses["name"]+"\n@"+courses["position"]
+            msg = msg+'\n'+starttime+'-'+endtime+'\n'+courses["name"]+"\n@"+courses["position"]+'\n'
     return msg            
 
-def now_class(uid)->str:#这里构造出当前课程的信息
+async def now_class(uid)->str:#这里构造出当前课程的信息
     presentweek = int((time.time() - int(
     usertable[uid]["data"]["setting"]['startSemester'][0:10]))//604800)+1
     today= weekday_int("今")
@@ -98,7 +98,7 @@ def now_class(uid)->str:#这里构造出当前课程的信息
         count=0
         for courses in usertable[uid]["data"]["courses"]:
             if (str(presentweek) in courses["weeks"].split(",")) and (today==courses["day"]) and (str(now_section) in courses["sections"].split(",")):
-                    msg+="\n你现在在上的课程信息如下喵:\n"+courses["name"]+"\n@"+courses["position"]+"\n"+courses["teacher"]
+                    msg+="\n你现在在上的课程信息如下喵:\n"+eval(usertable[uid]["data"]["setting"]["sectionTimes"])[int(courses["sections"].split(",")[0])-1]["s"]+"-"+eval(usertable[uid]["data"]["setting"]["sectionTimes"])[int(courses["sections"].split(",")[-1])-1]["e"]+'\n'+courses["name"]+"\n@"+courses["position"]+"\n"+courses["teacher"]
                     count+=1
         if not count:
             msg+="\n你现在没有课呢,空闲时间好好休息吧喵~"
@@ -112,7 +112,7 @@ def now_class(uid)->str:#这里构造出当前课程的信息
               
     
     
-def next_class(uid)->str:
+async def next_class(uid)->str:
     now_time=datetime.datetime.now().strftime("%H:%M")
     presentweek = int((time.time() - int(
     usertable[uid]["data"]["setting"]['startSemester'][0:10]))//604800)+1
