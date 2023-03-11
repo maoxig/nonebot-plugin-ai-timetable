@@ -16,10 +16,13 @@ logger.opt(colors=True).info(
     if scheduler
     else "未检测到软依赖<y>nonebot_plugin_apscheduler</y>,<r>禁用定时任务功能</r>"
 )
+__ai_timetable__usage__ = "@小爱课表帮助:\n#我的/本周课表:获取本周课表,也可以是下周\n#导入课表:使用小爱课程表分享的链接一键导入(需要登录小米账户)\n#某日课表:获取某日课表,如今日课表、周一课表\n#更新课表:更新本地课表信息,如果线上修改过小爱课表,发送该指令即可更新本地课表\n#订阅/取消订阅xx课表:可以订阅某天(如周一)的课表,在前一天晚上10点推送\n#订阅/取消订阅早八:订阅所有早八,在前一天晚上发出提醒\n#上课/下节课:获取当前课程信息以及今天以内的下节课信息"
+
+
 __plugin_meta__ = PluginMetadata(
     name="小爱课表",
     description="一键导入课表、查看课表、提醒上课、查询课程",
-    usage="请发送/课表帮助以获取详细信息",
+    usage=__ai_timetable__usage__ ,
 )
 mytable = on_regex(r'^(小爱|我的|本周|下周)(课表)', priority=20, block=False)
 newtable = on_command('导入课表', priority=20, block=False, aliases={'创建课表'})
@@ -39,8 +42,9 @@ send_next_class=on_command("上课",priority=20,block=False,aliases={"下节课"
 
 @tablehelp.handle()
 async def _(matcher: Matcher, bot: Bot, event: MessageEvent):
-    await tablehelp.finish(__usage__)
-__usage__ = "@小爱课表帮助:\n#我的/本周课表:获取本周课表,也可以是下周\n#导入课表:使用小爱课程表分享的链接一键导入\n#某日课表:获取某日课表,如今日课表、周一课表\n#更新课表:更新本地课表信息,如果线上修改过小爱课表,发送该指令即可更新本地课表\n#订阅/取消订阅xx课表:可以订阅某天(如周一)的课表,在前一天晚上10点推送\n#订阅/取消订阅早八:订阅所有早八,在前一天晚上发出提醒\n#上课/下节课:获取当前课程信息以及今天以内的下节课信息"
+    await tablehelp.finish(__ai_timetable__usage__ )
+    
+    
 
 
 @mytable.handle()  # 本/下 周完整课表
@@ -74,13 +78,16 @@ def geturl(response):
 async def _(matcher: Matcher, bot: Bot, event: MessageEvent, key: str = ArgStr()):
     uid = event.get_user_id()
     url = str(key)
-    log_debug("导入url", url)
+    logger.info( url)
     if re.match(base_url_re, url):  # 用户发送的链接匹配
         async with get_new_page(viewport={"width": 1000, "height": 1200}) as page:
             page.on("response", lambda response: geturl(response))
             await page.goto(url, wait_until='networkidle')
             global res_url
-            log_debug("response.url", res_url)
+            logger.info(res_url)
+            if res_url=="寄":
+                logger.error("没有监听到正确的url,可能是分享链接前没有登录小米账户")
+                await newtable.finish("出错了,没有监听到正确的url,可能是分享链接前没有登录小米账户", at_sender=True)
             async with httpx.AsyncClient() as r:
                 res = await r.get(res_url)
                 usertable.update({uid: res.json()})
@@ -118,7 +125,10 @@ async def _(matcher:Matcher,bot:Bot,event:MessageEvent):
             page.on("response", lambda response: geturl(response))
             await page.goto(userdata[uid], wait_until='networkidle')
             global res_url
-            log_debug("response.url", res_url)
+            logger.info(res_url)
+            if res_url=="寄":
+                logger.error("没有监听到正确的url,可能是分享链接前没有登录小米账户")
+                await newtable.finish("出错了,没有监听到正确的url,可能是分享链接前没有登录小米账户", at_sender=True)
             async with httpx.AsyncClient() as r:
                 res = await r.get(res_url)
                 usertable.update({uid: res.json()})

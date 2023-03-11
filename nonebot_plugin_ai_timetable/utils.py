@@ -5,8 +5,6 @@ import datetime
 from nonebot import logger
 
 
-def log_debug(command: str, info: str):
-    logger.opt(colors=True).debug(f'<u><y>[{command}]</y></u>{info}')
 
 
 res_url_re = r'^(https://i\.ai\.mi\.com/course-multi/table\?)*(ctId=)\d+(&userId=)\d*[1-9]\d*(&deviceId=)[0-9a-zA-Z]*(&sourceName=course-app-browser)'

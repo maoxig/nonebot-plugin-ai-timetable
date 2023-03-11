@@ -45,6 +45,9 @@ nb plugin install nonebot_plugin_apscheduler
 
 ## 更新日志
 
+<details>
+<summary>点击展开</summary>
+
 - 2023-03-05:
 
     修复了无法取消订阅早八的bug
@@ -65,6 +68,12 @@ nb plugin install nonebot_plugin_apscheduler
 
 2. 修复了节数为11的课会排在节数为2的课程前面的bug(QAQ太蠢了别骂了别骂了)
 
+- 2023-03-11:
+
+1. 修复了如果未登录小米账户就分享课表时的报错,增加错误提示
+
+</details>
+
 ## 命令
 
 1. 我的课表|小爱课表|本周课表|下周课表：获取本周|下周的完全课表，使用前须先导入课表，这里的课表是在线课表
@@ -73,7 +82,7 @@ nb plugin install nonebot_plugin_apscheduler
 
     ![Image text](https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/export.jpg)
 
-    在基本设置里把开始上课时间等调整好之后(尤其是时间、节数)，把分享课表得到的链接发送给bot即可导入本地
+    在基本设置里把开始上课时间等调整好之后(尤其是时间、节数)，把分享课表得到的链接发送给bot即可导入本地(分享前需要登录小米账户 #1)
   
 3. (昨天|今天|明天|后天|周X|星期x|)(课表|有啥课|上啥课)：查询指定天的课表，其中查询周x课表查询的是本周的
 
@@ -100,6 +109,7 @@ nb plugin install nonebot_plugin_apscheduler
 
 如下图
 
+- 首先要登录上小米账户,否则可能获取到错误的课表信息 #1
 - 设置好开始上课时间
 - 设置好课程时间，可以修改每节课具体的时间，
 - 课表节数按自己需求调，一般教务导入的课表节数可能不符合实际，需要微调
@@ -111,15 +121,17 @@ nb plugin install nonebot_plugin_apscheduler
 
 ## 计划
 
-    ☑︎ 查询下节课的信息
+- [x] 查询下节课的信息
 
-    ⬜︎ 完善插件
-    
-    ⬜︎ 增加更多的配置项
+- [ ] 完善插件
 
-    ⬜︎ 订阅指定的课
+- [ ] 增加更多的配置项
 
-    ⬜︎ 查询早八等
+- [ ] 订阅指定的课
+
+- [ ] 查询早八
+
+- [ ] 可选择是否发送图片以避免风控
 
 ## 存在的问题
 
