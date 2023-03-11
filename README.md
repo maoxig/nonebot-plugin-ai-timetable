@@ -17,6 +17,11 @@
 ## 安装
 
 1. 通过`pip`或`nb`安装；
+    - 使用nb(极度推荐)
+      - 在机器人目录下使用`nb plugin install nonebot_plugin_ai_timetable`
+    - 使用pip
+      - 进入虚拟环境后（如果有），使用`pip install nonebot_plugin_ai_timetable`,然后找到机器人目录下的`pyproject.toml`的`plugins = ["nonebot_plugin_gocqhttp",  "nonebot_plugin_htmlrender",  "nonebot_plugin_apscheduler"]`这一行追加`"nonebot_plugin_ai_timetable"`(注意格式等)
+    - 可选参数: 因为本人更新比较勤快，推荐在上述指令后加上`-U -i https://pypi.org/simple`以升级/指定官方源 
 
 2. 本地数据保存在`/data/ai_timetable/userdata.json`以及`/data/ai_timetable/usertable.json`，分别对应用户发送的链接和本地保存的课表
 
@@ -45,9 +50,9 @@ nb plugin install nonebot_plugin_htmlrender
 nb plugin install nonebot_plugin_apscheduler
 ```
 
-若不安装nonebot_plugin_htmlrender插件会无法导入在线课表
+若不安装[nonebot_plugin_htmlrender](https://github.com/kexue-z/nonebot-plugin-htmlrender)插件会无法导入在线课表
 
-不安装nonebot_plugin_apscheduler会无法使用定时任务,其他功能无影响
+不安装[nonebot_plugin_apscheduler](https://github.com/nonebot/plugin-apscheduler)会无法使用定时任务,其他功能无影响
 
 ## 更新日志
 
@@ -116,7 +121,7 @@ nb plugin install nonebot_plugin_apscheduler
 
 如下图
 
-- 首先要登录上小米账户,否则可能获取到错误的课表信息 #1
+- 首先要登录上小米账户,否则可能获取到错误的课表信息 [#1](https://github.com/maoxig/nonebot-plugin-ai-timetable/issues/1)
 - 设置好开始上课时间
 - 设置好课程时间，可以修改每节课具体的时间，
 - 课表节数按自己需求调，一般教务导入的课表节数可能不符合实际，需要微调
