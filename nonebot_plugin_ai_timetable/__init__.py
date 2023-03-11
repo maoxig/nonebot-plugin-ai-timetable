@@ -1,5 +1,6 @@
 import httpx
 import re
+import io
 from .utils import*
 from nonebot.plugin import PluginMetadata
 from nonebot.matcher import Matcher
@@ -9,8 +10,9 @@ from nonebot.adapters.onebot.v11 import Bot, MessageSegment, MessageEvent, Group
 from nonebot import require, get_bot
 require('nonebot_plugin_htmlrender')
 require('nonebot_plugin_apscheduler')
-from nonebot_plugin_htmlrender import get_new_page
+from nonebot_plugin_htmlrender import get_new_page,md_to_pic
 from nonebot_plugin_apscheduler import scheduler
+from PIL import Image
 logger.opt(colors=True).info(
     "已检测到软依赖<y>nonebot_plugin_apscheduler</y>, <g>开启定时任务功能</g>"
     if scheduler
@@ -24,6 +26,10 @@ __plugin_meta__ = PluginMetadata(
     description="一键导入课表、查看课表、提醒上课、查询课程",
     usage=__ai_timetable__usage__ ,
 )
+
+
+
+
 mytable = on_regex(r'^(小爱|我的|本周|下周)(课表)', priority=20, block=False)
 newtable = on_command('导入课表', priority=20, block=False, aliases={'创建课表'})
 tablehelp = on_command("课表帮助", priority=20, block=False,
@@ -40,13 +46,11 @@ remove_alock_morningclass=on_command("取消订阅早八",priority=20,block=Fals
 renew_table=on_command("更新本地课表",priority=20,block=False,aliases={'更新课表'})
 send_next_class=on_command("上课",priority=20,block=False,aliases={"下节课"})
 
+
 @tablehelp.handle()
 async def _(matcher: Matcher, bot: Bot, event: MessageEvent):
     await tablehelp.finish(__ai_timetable__usage__ )
     
-    
-
-
 @mytable.handle()  # 本/下 周完整课表
 async def _(bot: Bot, event: MessageEvent, key: str = RegexMatched()):
     uid = event.get_user_id()
@@ -113,7 +117,13 @@ async def _(matcher: Matcher, bot: Bot, event: MessageEvent, key: str = RegexMat
         await someday_table.finish('你还没有导入课表喵,发送\\导入课表来导入吧！', at_sender=True)
     else:
         msg=await table_msg(key,uid)
-        await someday_table.finish(msg, at_sender=True)
+        if timetable_pic==True:
+            pic=await md_to_pic(md=msg)
+            a = Image.open(io.BytesIO(pic))
+            a.save("someday_table.png",format="PNG")
+            await someday_table.finish("你要的课表来咯喵"+MessageSegment.image(pic))
+        else:
+            await someday_table.finish(msg, at_sender=True)
 
 @renew_table.handle()#更新本地课表
 async def _(matcher:Matcher,bot:Bot,event:MessageEvent):
@@ -160,7 +170,7 @@ async def _(matcher: Matcher, bot: Bot, event: GroupMessageEvent, key: str = Reg
             send_day = (weekday_int(key)+5) % 7
             if scheduler.get_job(str(uid+"post_alock_group"+str(send_day))):
                 await add_alock_someday.finish("出错了喵！你好像已经订阅过这天的课表了呢", at_sender=True)
-            scheduler.add_job(post_alock, "cron", hour=22, id=str(
+            scheduler.add_job(post_alock, "cron", hour=timetable_alock_someday, id=str(
                 uid+"post_alock_group"+str(send_day)), args=[key, uid, gid], day_of_week=send_day)
             await add_alock_someday.finish("定时提醒添加成功！", at_sender=True)
         else:
@@ -176,7 +186,7 @@ async def _(matcher: Matcher, bot: Bot, event: PrivateMessageEvent, key: str = R
             send_day = (weekday_int(key)+5) % 7
             if scheduler.get_job(str(uid+"post_alock_private"+str(send_day))):
                 await add_alock_someday.finish("出错了喵！你好像已经订阅过这天的课表了呢", at_sender=True)
-            scheduler.add_job(post_alock, "cron", hour=22, id=str(
+            scheduler.add_job(post_alock, "cron", hour=timetable_alock_someday, id=str(
                 uid+"post_alock_private"+str(send_day)), args=[key, uid,None], day_of_week=send_day)
             await add_alock_someday.finish("定时提醒添加成功！", at_sender=True)
         else:
@@ -226,7 +236,7 @@ async def _(matcher:Matcher,bot:Bot,event:GroupMessageEvent):
         if scheduler:
             if scheduler.get_job(str(uid+"post_alock_morningclass_group")):
                 await add_alock_morningcalss.finish("出错了喵！你好像已经订阅过早八提醒了呢", at_sender=True)
-            scheduler.add_job(post_alock_morningclass, "cron", hour=21,id=str(uid+"post_alock_morningclass_group"), args=[uid, gid])
+            scheduler.add_job(post_alock_morningclass, "cron", hour=timetable_alock_8,id=str(uid+"post_alock_morningclass_group"), args=[uid, gid])
             await add_alock_morningcalss.finish("定时提醒添加成功！", at_sender=True)
         else:
             await add_alock_morningcalss.finish("apscheduler插件未载入,无法添加定时提醒喵", at_sender=True)
@@ -240,7 +250,7 @@ async def _(matcher:Matcher,bot:Bot,event:PrivateMessageEvent):
         if scheduler:
             if scheduler.get_job(str(uid+"post_alock_morningclass_private")):
                 await add_alock_morningcalss.finish("出错了喵！你好像已经订阅过早八提醒了呢", at_sender=True)
-            scheduler.add_job(post_alock_morningclass, "cron", hour=21,id=str(uid+"post_alock_morningclass_private"), args=[uid, None])
+            scheduler.add_job(post_alock_morningclass, "cron", hour=timetable_alock_8,id=str(uid+"post_alock_morningclass_private"), args=[uid, None])
             await add_alock_morningcalss.finish("定时提醒添加成功！", at_sender=True)
         else:
             await add_alock_morningcalss.finish("apscheduler插件未载入,无法添加定时提醒喵", at_sender=True)
@@ -283,14 +293,23 @@ async def post_alock(*args):#发送某天的课表消息
     if '一' in key:
         key = "明日课表"  # 发送周一课表时是周日,所以要发送的其实是明日课表
     msg = await table_msg(key=key, uid=uid)
+    if timetable_pic==True:
+            pic=await md_to_pic(md=msg)
+            a = Image.open(io.BytesIO(pic))
+            a.save("someday_table_alock.png",format="PNG")
+            
     if not args[2]:
         send_id = args[1]
-        message_type="private"
-        await get_bot().send_msg(message_type=message_type,user_id=send_id,message=MessageSegment.at(int(uid))+msg)
+        if timetable_pic==True:
+            await get_bot().send_msg(user_id=send_id,message="你要的课表来咯喵"+MessageSegment.image(pic))
+        else:
+            await get_bot().send_msg(user_id=send_id,message=msg)
     else:
-        message_type="group"
         send_id=args[2]
-        await get_bot().send_msg(message_type=message_type,group_id=send_id,message=MessageSegment.at(int(uid))+msg)
+        if timetable_pic==True:
+            await get_bot().send_msg(group_id=send_id,message="你要的课表来咯喵"+MessageSegment.image(pic))
+        else:
+            await get_bot().send_msg(group_id=send_id,message=MessageSegment.at(int(uid))+msg)
 
     
     

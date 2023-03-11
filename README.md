@@ -30,9 +30,13 @@
 
 4. 插件配置
 
-    ``` python
-    暂无，以后可能慢慢增加
-    ```
+如果想要修改配置，在机器人目录下的.env.*里面可以填写以下选项(可选)
+
+| config                  | type  | default |          example           | usage                                               |
+| :---------------------- | :---: | :-----: | :------------------------: | :-------------------------------------------------- |
+| TIMETABLE_PIC           | bool  |  true   |    TIMETABLE_PIC=false     | 可选择某日课表以图片/文字发送，默认以图片发送(true) |
+| TIMETABLE_ALOCK_SOMEDAY |  int  |   22    | TIMETABLE_ALOCK_SOMEDAY=15 | 订阅某日课表的发送时间，必须是0-24的数字            |
+| TIMETABLE_ALOCK_8       |  int  |   21    | TIMETABLE_ALOCK_SOMEDAY=16 | 订阅早八的发送时间，必须是0-24的数字                |
 
 ## 依赖
 
@@ -42,6 +46,8 @@ nb plugin install nonebot_plugin_apscheduler
 ```
 
 若不安装nonebot_plugin_htmlrender插件会无法导入在线课表
+
+不安装nonebot_plugin_apscheduler会无法使用定时任务,其他功能无影响
 
 ## 更新日志
 
@@ -71,6 +77,7 @@ nb plugin install nonebot_plugin_apscheduler
 - 2023-03-11:
 
 1. 修复了如果未登录小米账户就分享课表时的报错,增加错误提示
+2. 新增3项配置项，某日课表可选择以图片发送（默认为图片）
 
 </details>
 
@@ -104,7 +111,7 @@ nb plugin install nonebot_plugin_apscheduler
 ![Image text](https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/resource/alock_8.jpg)
 ![Image text](https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/resource/next_class.jpg)
 ![Image text](https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/resource/someday_classes.jpg)
-
+![Image text](https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/resource/someday_classes_pic.jpg)
 ### 关于小爱课程表内的一些说明
 
 如下图
@@ -123,15 +130,15 @@ nb plugin install nonebot_plugin_apscheduler
 
 - [x] 查询下节课的信息
 
-- [ ] 完善插件
+- [x] 可选择是否发送图片以避免风控
 
-- [ ] 增加更多的配置项
+- [x] 增加更多的配置项
+
+- [ ] 完善插件
 
 - [ ] 订阅指定的课
 
 - [ ] 查询早八
-
-- [ ] 可选择是否发送图片以避免风控
 
 ## 存在的问题
 

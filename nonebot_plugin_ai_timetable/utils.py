@@ -2,7 +2,13 @@ import os
 import json
 import time
 import datetime
-from nonebot import logger
+from nonebot import get_driver,logger
+
+
+config = get_driver().config
+timetable_pic: bool = getattr(config, "timetable_pic", True)
+timetable_alock_someday: int = getattr(config, "timetable_alock_someday", 22)
+timetable_alock_8: int = getattr(config, "timetable_alock_8", 21)
 
 
 
@@ -69,9 +75,13 @@ async def table_msg(key,uid)->str:
         someday -= 7
         presentweek += 1
         # 构造发送的信息
-    msg = '你要的课表来咯喵:\n'
+    if timetable_pic==True:
+        msg="|时间|课程|地点|\n| :-----| :----: | :----: |"
+    else:
+        msg="你要的课表来咯喵"
     for courses in usertable[uid]["data"]["courses"]:
         if(courses["day"] == someday) and (str(presentweek) in courses["weeks"].split(',')):
+            
             sections=courses["sections"].split(",")
             startsection=int(sections[0])
             endsection=int(sections[-1])
@@ -79,7 +89,11 @@ async def table_msg(key,uid)->str:
                 startsection-1]["s"]
             endtime = eval(usertable[uid]["data"]["setting"]["sectionTimes"])[
                 endsection-1]["e"]
-            msg = msg+'\n'+starttime+'-'+endtime+'\n'+courses["name"]+"\n@"+courses["position"]+'\n'
+            if timetable_pic==True:
+                msg =msg+'\n'+'|'+starttime+'-'+endtime+'|'+courses["name"]+'|'+courses["position"]
+                
+            else:
+                msg = msg+'\n'+starttime+'-'+endtime+'\n'+courses["name"]+"\n@"+courses["position"]+'\n'
     return msg            
 
 async def now_class(uid)->str:#这里构造出当前课程的信息
