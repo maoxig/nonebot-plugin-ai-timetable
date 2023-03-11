@@ -33,10 +33,10 @@
 如果想要修改配置，在机器人目录下的.env.*里面可以填写以下选项(可选)
 
 | config                  | type  | default |          example           | usage                                               |
-| :---------------------- | :---: | :-----: | :------------------------: | :-------------------------------------------------- |
+| :---------------------: | :---: | :-----: | :------------------------: | :-------------------------------------------------- |
 | TIMETABLE_PIC           | bool  |  true   |    TIMETABLE_PIC=false     | 可选择某日课表以图片/文字发送，默认以图片发送(true) |
 | TIMETABLE_ALOCK_SOMEDAY |  int  |   22    | TIMETABLE_ALOCK_SOMEDAY=15 | 订阅某日课表的发送时间，必须是0-24的数字            |
-| TIMETABLE_ALOCK_8       |  int  |   21    | TIMETABLE_ALOCK_SOMEDAY=16 | 订阅早八的发送时间，必须是0-24的数字                |
+| TIMETABLE_ALOCK_8       |  int  |   21    | TIMETABLE_ALOCK_8=16 | 订阅早八的发送时间，必须是0-24的数字                |
 
 ## 依赖
 
@@ -71,7 +71,6 @@ nb plugin install nonebot_plugin_apscheduler
 - 2023-03-08:
 
 1. 修改部分代码，优化课表格式
-
 2. 修复了节数为11的课会排在节数为2的课程前面的bug(QAQ太蠢了别骂了别骂了)
 
 - 2023-03-11:
@@ -89,7 +88,7 @@ nb plugin install nonebot_plugin_apscheduler
 
     ![Image text](https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/resource/export.jpg)
 
-    在基本设置里把开始上课时间等调整好之后(尤其是时间、节数)，把分享课表得到的链接发送给bot即可导入本地(分享前需要登录小米账户 #1)
+    在基本设置里把开始上课时间等调整好之后(尤其是时间、节数)，把分享课表得到的链接发送给bot即可导入本地(分享前需要登录小米账户 [#1](https://github.com/maoxig/nonebot-plugin-ai-timetable/issues/1))
   
 3. (昨天|今天|明天|后天|周X|星期x|)(课表|有啥课|上啥课)：查询指定天的课表，其中查询周x课表查询的是本周的
 
@@ -112,6 +111,7 @@ nb plugin install nonebot_plugin_apscheduler
 ![Image text](https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/resource/next_class.jpg)
 ![Image text](https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/resource/someday_classes.jpg)
 ![Image text](https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/resource/someday_classes_pic.jpg)
+
 ### 关于小爱课程表内的一些说明
 
 如下图
