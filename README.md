@@ -80,7 +80,7 @@ nb plugin install nonebot_plugin_apscheduler
 
 2. 导入课表：需要有小爱课表分享出来的链接，打开小爱课程表，手动添加课程或从教务导入(已适配了大部分高校)课程后
 
-    ![Image text](https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/export.jpg)
+    ![Image text](https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/resource/export.jpg)
 
     在基本设置里把开始上课时间等调整好之后(尤其是时间、节数)，把分享课表得到的链接发送给bot即可导入本地(分享前需要登录小米账户 #1)
   
