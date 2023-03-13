@@ -18,12 +18,12 @@
 
 1. 通过`pip`或`nb`安装；
     - 使用nb(极度推荐)
-      - 在机器人目录下使用`nb plugin install nonebot_plugin_ai_timetable`
-    - 使用pip
+      - 在机器人目录下命令行使用`nb plugin install nonebot_plugin_ai_timetable`
+    - 使用pip(不推荐)
       - 进入虚拟环境后（如果有），使用`pip install nonebot_plugin_ai_timetable`,然后找到机器人目录下的`pyproject.toml`的`plugins = ["nonebot_plugin_gocqhttp",  "nonebot_plugin_htmlrender",  "nonebot_plugin_apscheduler"]`这一行追加`"nonebot_plugin_ai_timetable"`(注意格式等)
-    - 可选参数: 因为本人更新比较勤快，推荐在上述指令后加上`-U -i https://pypi.org/simple`以升级/指定官方源 
+    - 可选参数: 推荐在上述指令后加上`-U -i https://pypi.org/simple`以升级/指定官方源 
 
-2. 本地数据保存在`/data/ai_timetable/userdata.json`以及`/data/ai_timetable/usertable.json`，分别对应用户发送的链接和本地保存的课表
+2. 本地数据保存在`data/ai_timetable/userdata.json`以及`data/ai_timetable/usertable.json`，分别对应用户发送的链接和本地保存的课表
 
 ## 简介
 
@@ -37,11 +37,11 @@
 
 如果想要修改配置，在机器人目录下的.env.*里面可以填写以下选项(可选)
 
-| config                  | type  | default |          example           | usage                                               |
-| :---------------------: | :---: | :-----: | :------------------------: | :-------------------------------------------------- |
-| TIMETABLE_PIC           | bool  |  true   |    TIMETABLE_PIC=false     | 可选择某日课表以图片/文字发送，默认以图片发送(true) |
-| TIMETABLE_ALOCK_SOMEDAY |  int  |   22    | TIMETABLE_ALOCK_SOMEDAY=15 | 订阅某日课表的发送时间，必须是0-24的数字            |
-| TIMETABLE_ALOCK_8       |  int  |   21    | TIMETABLE_ALOCK_8=16 | 订阅早八的发送时间，必须是0-24的数字                |
+|         config          | type  | default |          example           | usage                                                                              |
+| :---------------------: | :---: | :-----: | :------------------------: | :--------------------------------------------------------------------------------- |
+|      TIMETABLE_PIC      | bool  |  true   |    TIMETABLE_PIC=false     | 可选择某日课表以图片/文字发送，默认以图片发送(true)                                |
+| TIMETABLE_ALOCK_SOMEDAY |  int  |   22    | TIMETABLE_ALOCK_SOMEDAY=15 | 订阅某日课表的发送时间，必须是0-24的数字                                           |
+|    TIMETABLE_ALOCK_8    |  int  |   21    |    TIMETABLE_ALOCK_8=16    | 订阅早八的发送时间，必须是0-24的数字.这里发送的都是第二天的，所以建议设置为18-23点 |
 
 ## 依赖
 
@@ -82,6 +82,10 @@ nb plugin install nonebot_plugin_apscheduler
 
 1. 修复了如果未登录小米账户就分享课表时的报错,增加错误提示
 2. 新增3项配置项，某日课表可选择以图片发送（默认为图片）
+
+- 2023-03-13：
+
+    修复订阅早八的一些bug
 
 </details>
 
@@ -142,8 +146,6 @@ nb plugin install nonebot_plugin_apscheduler
 - [ ] 完善插件
 
 - [ ] 订阅指定的课
-
-- [ ] 查询早八
 
 ## 存在的问题
 

@@ -62,7 +62,7 @@ async def _(bot: Bot, event: MessageEvent, key: str = RegexMatched()):
             await page.evaluate('var t = document.querySelector("#root>div>div.importSchedule___UjEKt>div.footer___1iAis.toUp___2mciB"); t.style.display = "none"')
             if '下' in key:  # 如果命令中有下字,就点击下一周的按钮
                 await page.click("#schedule-view > div.header___26sI1 > div.presentWeek___-o65e > div.rightBtn___2ZhSY")
-            pic = await page.screenshot(full_page=True, path="./mytable.png")
+            pic = await page.screenshot(full_page=True, path="data/ai_timetable/mytable.png")
             await mytable.finish(MessageSegment.image(pic))
 
     else:
@@ -120,8 +120,8 @@ async def _(matcher: Matcher, bot: Bot, event: MessageEvent, key: str = RegexMat
         if timetable_pic==True:
             pic=await md_to_pic(md=msg)
             a = Image.open(io.BytesIO(pic))
-            a.save("someday_table.png",format="PNG")
-            await someday_table.finish("你要的课表来咯喵"+MessageSegment.image(pic))
+            a.save("data/ai_timetable/someday_table.png",format="PNG")
+            await someday_table.finish("你要的课表来咯喵"+MessageSegment.image(pic),at_sender=True)
         else:
             await someday_table.finish(msg, at_sender=True)
 
@@ -263,8 +263,8 @@ async def _(matcher: Matcher, bot: Bot, event: GroupMessageEvent):
         await add_alock_morningcalss.finish('你还没有导入课表,发送\\导入课表来导入吧！', at_sender=True)
     else:
         if scheduler:
-            if scheduler.get_job(str(uid+"post_alock_morningclass")):
-                scheduler.remove_job(str(uid+"post_alock_morningclass"))
+            if scheduler.get_job(str(uid+"post_alock_morningclass_group")):
+                scheduler.remove_job(str(uid+"post_alock_morningclass_group"))
                 await remove_alock_morningclass.finish("定时提醒删除成功！", at_sender=True)
             else:
                 await remove_alock_morningclass.finish("出错了,好像没有订阅过早八呢", at_sender=True)
@@ -278,8 +278,8 @@ async def _(matcher: Matcher, bot: Bot, event: PrivateMessageEvent):
         await add_alock_morningcalss.finish('你还没有导入课表,发送\\导入课表来导入吧！', at_sender=True)
     else:
         if scheduler:
-            if scheduler.get_job(str(uid+"post_alock_morningclass")):
-                scheduler.remove_job(str(uid+"post_alock_morningclass"))
+            if scheduler.get_job(str(uid+"post_alock_morningclass_private")):
+                scheduler.remove_job(str(uid+"post_alock_morningclass_private"))
                 await remove_alock_morningclass.finish("定时提醒删除成功！", at_sender=True)
             else:
                 await remove_alock_morningclass.finish("出错了,好像没有订阅过早八呢", at_sender=True)
@@ -296,7 +296,7 @@ async def post_alock(*args):#发送某天的课表消息
     if timetable_pic==True:
             pic=await md_to_pic(md=msg)
             a = Image.open(io.BytesIO(pic))
-            a.save("someday_table_alock.png",format="PNG")
+            a.save("data/ai_timetable/someday_table_alock.png",format="PNG")
             
     if not args[2]:
         send_id = args[1]
