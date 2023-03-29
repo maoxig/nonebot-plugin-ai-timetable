@@ -80,6 +80,8 @@ async def _(event: MessageEvent, key: str = RegexMatched()):
         if timetable_pic:
             pic=await AiTimetable.someday_table(uid=uid,key=key)
             await someday_table.finish(MessageSegment.image(pic))
+        else:
+            await someday_table.finish(await AiTimetable.someday_table(uid=uid,key=key))
 
 @renew_table.handle()#更新本地课表
 async def _(event:MessageEvent):
