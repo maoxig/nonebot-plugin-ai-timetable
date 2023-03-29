@@ -18,10 +18,12 @@
 
 1. 通过`pip`或`nb`安装；
     - 使用nb(极度推荐)
-      - 在机器人目录下命令行使用`nb plugin install nonebot_plugin_ai_timetable`
-    - 使用pip(不推荐)
-      - 进入虚拟环境后（如果有），使用`pip install nonebot_plugin_ai_timetable`,然后找到机器人目录下的`pyproject.toml`的`plugins = ["nonebot_plugin_gocqhttp",  "nonebot_plugin_htmlrender",  "nonebot_plugin_apscheduler"]`这一行追加`"nonebot_plugin_ai_timetable"`(注意格式等)
-    - 可选参数: 推荐在上述指令后加上`-U -i https://pypi.org/simple`以升级/指定官方源 
+  
+       在机器人目录下命令行使用`nb plugin install nonebot_plugin_ai_timetable`
+
+    - 使用pip(不推荐):
+  
+      ~~既然不推荐就不要想着这样安装了啊喂~~
 
 2. 本地数据保存在`data/ai_timetable/userdata.json`以及`data/ai_timetable/usertable.json`，分别对应用户发送的链接和本地保存的课表
 
@@ -87,6 +89,13 @@ nb plugin install nonebot_plugin_apscheduler
 
     修复订阅早八的一些bug
 
+- 2023-03-29:
+
+1. 重构了代码，优化了许多地方~~真的累死了~~
+2. 修复了一些bug，优化了体验
+3. 增加了早八|明日早八的查询
+4. 更新版本后建议重新[导入课表]，避免出现某些bug
+
 </details>
 
 ## 命令
@@ -109,7 +118,9 @@ nb plugin install nonebot_plugin_apscheduler
 
 7. 上课|下节课：获取当前上课信息，返回下节课信息(如果有)
 
-8. 课表帮助：获取课表帮助
+8. 早八|明日早八：查询明天的早八
+
+9. 课表帮助：获取课表帮助
 
 未完待续
 
@@ -143,13 +154,15 @@ nb plugin install nonebot_plugin_apscheduler
 
 - [x] 增加更多的配置项
 
+- [x] 重构代码
+
 - [ ] 完善插件
 
 - [ ] 订阅指定的课
 
 ## 存在的问题
 
- 1. 小爱课表分享的链接可能会过期，可能会导致无法进入指定页面截图(暂不清楚链接有效时间是多久)
+ 1. 小爱课表分享的链接大概2周后会过期，会使得`我的课表\下周课表`无法使用，需要重新分享，但是仍能使用本地课表，也可以更新本地课表
 
  2. 机器人重启后定时任务会丢失
 
