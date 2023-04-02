@@ -1,7 +1,7 @@
 from nonebot.adapters.onebot.v11 import ActionFailed,MessageSegment
 from nonebot import get_driver, logger, require
 require('nonebot_plugin_htmlrender')
-from nonebot_plugin_htmlrender import get_new_page, md_to_pic,text_to_pic
+from nonebot_plugin_htmlrender import get_new_page, md_to_pic
 import os
 import re
 import json
@@ -44,8 +44,11 @@ class AiTimetable:
     res_url_re = r'^(https://i\.ai\.mi\.com/course-multi/table\?)*(ctId=)\d+(&userId=)\d*[1-9]\d*(&deviceId=)[0-9a-zA-Z]*(&sourceName=course-app-browser)'
     base_url_re = r'https://cdn\.cnbj1\.fds\.api\.mi-img.com/miai-fe-aischedule-wx-redirect-fe/redirect.html\?linkToken=.+'
 
-    ai_timetable__usage = "@小爱课表帮助:\n#我的/本周课表: 获取本周课表,也可以是下周\n#导入课表: 使用小爱课程表分享的链接一键导入\n#某日课表: 获取某日课表,如今日课表、周一课表\n#更新课表: 更新本地课表信息,如果线上修改过小爱课表,发送该指令即可更新本地课表\n#订阅/取消订阅xx课表: 可以订阅某天(如周一)的课表,在前一天晚上10点推送\n#订阅/取消订阅早八: 订阅所有早八,在前一天晚上发出提醒\n#上课/下节课: 获取当前课程信息以及今天以内的下节课信息\n#早八|明日早八: 查询明天的早八"
+    ai_timetable__usage = "## 小爱课表帮助:\n- 我的/本周课表: 获取本周课表,也可以是下周\n- 导入课表: 使用小爱课程表分享的链接一键导入\n- 某日课表: 获取某日课表,如今日课表、周一课表\n- 更新课表: 更新本地课表信息,如果线上修改过小爱课表,发送该指令即可更新本地课表\n- 订阅/取消订阅xx课表: 可以订阅某天(如周一)的课表,在前一天晚上10点推送\n- 订阅/取消订阅早八: 订阅所有早八,在前一天晚上发出提醒\n- 上课/下节课: 获取当前课程信息以及今天以内的下节课信息\n- 早八|明日早八: 查询明天的早八"
 
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36 Edg/110.0.1587.63'
+    }
     def __init__(self, uid) -> None:
         self.uid=uid
 
@@ -182,7 +185,7 @@ class AiTimetable:
                 await page.goto(url=base_url,wait_until="networkidle")
                 if uid in userdata:
                     async with httpx.AsyncClient() as client:
-                        res=await client.get(userdata[uid][1])
+                        res=await client.get(userdata[uid][1],headers=cls.headers)
                         usertable.update({uid:res.json()})
                         #更新课表
                         usertable[uid]["data"]["courses"].sort(
@@ -202,7 +205,7 @@ class AiTimetable:
         """用户已有url的情况下更新本地课表"""
         try:
             async with httpx.AsyncClient() as client:
-                res=await client.get(userdata[uid][1])
+                res=await client.get(userdata[uid][1],headers=cls.headers)
                 usertable.update({uid:res.json()})
                         #更新课表
                 usertable[uid]["data"]["courses"].sort(

@@ -96,6 +96,12 @@ nb plugin install nonebot_plugin_apscheduler
 3. 增加了早八|明日早八的查询
 4. 更新版本后建议重新[导入课表]，避免出现某些bug
 
+- 2023-04-02:
+
+1. 修复bug
+2. 优化帮助图片
+3. 定时任务随机延后0-60s，防止风控
+
 </details>
 
 ## 命令
