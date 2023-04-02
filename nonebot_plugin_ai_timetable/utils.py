@@ -17,7 +17,7 @@ config = get_driver().config
 timetable_pic: bool = getattr(config, "timetable_pic", True)
 timetable_alock_someday: int = getattr(config, "timetable_alock_someday", 22)
 timetable_alock_8: int = getattr(config, "timetable_alock_8", 21)
-timetable_send_time:int=getattr(config,"timetable_send_time",0.5)
+timetable_send_time:float=getattr(config,"timetable_send_time",0.5)
 
 if os.path.exists("data/ai_timetable/userdata.json"):
     with open("data/ai_timetable/userdata.json", 'r', encoding='utf-8') as f:

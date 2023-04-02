@@ -44,7 +44,7 @@
 |      TIMETABLE_PIC      | bool  |  true   |    TIMETABLE_PIC=false     | 可选择某日课表以图片/文字发送，默认以图片发送(true)                                |
 | TIMETABLE_ALOCK_SOMEDAY |  int  |   22    | TIMETABLE_ALOCK_SOMEDAY=15 | 订阅某日课表的发送时间，必须是0-24的数字                                           |
 |    TIMETABLE_ALOCK_8    |  int  |   21    |    TIMETABLE_ALOCK_8=16    | 订阅早八的发送时间，必须是0-24的数字.这里发送的都是第二天的，所以建议设置为18-23点 |
-|    TIMETABLE_SEND_TIME    |  int  |   0.5    |    TIMETABLE_SEND_TIME=1    | 订阅课程提前发送的时间，单位是`小时`，可以是整数也可以是小数，建议不要设的太大，避免出现无法预料的bug |
+|    TIMETABLE_SEND_TIME    |  float  |   0.5    |    TIMETABLE_SEND_TIME=1    | 订阅课程提前发送的时间，单位是`小时`，可以是整数也可以是小数，建议不要设的太大，避免出现无法预料的bug |
 
 ## 依赖
 
@@ -95,7 +95,7 @@ nb plugin install nonebot_plugin_apscheduler
 1. 重构了代码，优化了许多地方~~真的累死了~~
 2. 修复了一些bug，优化了体验
 3. 增加了早八|明日早八的查询
-4. 更新版本后建议重新[导入课表]，避免出现某些bug
+4. 更新版本后建议重新`导入课表`，避免出现某些bug
 
 - 2023-04-02:
 
