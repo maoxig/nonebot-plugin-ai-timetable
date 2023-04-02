@@ -1,6 +1,8 @@
 from nonebot.adapters.onebot.v11 import ActionFailed,MessageSegment
 from nonebot import get_driver, logger, require
 require('nonebot_plugin_htmlrender')
+require('nonebot_plugin_apscheduler')
+from nonebot_plugin_apscheduler import scheduler
 from nonebot_plugin_htmlrender import get_new_page, md_to_pic
 import os
 import re
@@ -8,14 +10,14 @@ import json
 import time
 import datetime
 import httpx
-
+import random
 
 
 config = get_driver().config
 timetable_pic: bool = getattr(config, "timetable_pic", True)
 timetable_alock_someday: int = getattr(config, "timetable_alock_someday", 22)
 timetable_alock_8: int = getattr(config, "timetable_alock_8", 21)
-
+timetable_send_time:int=getattr(config,"timetable_send_time",0.5)
 
 if os.path.exists("data/ai_timetable/userdata.json"):
     with open("data/ai_timetable/userdata.json", 'r', encoding='utf-8') as f:
@@ -268,4 +270,58 @@ class AiTimetable:
                 await bot.send(event,message=msg,at_sender=True)
         except ActionFailed as e:
             logger.warning(f"发送消息失败：{e}")
+            
+    @classmethod
+    def sub_class(cls,**kwargs)->str:
+        """订阅一周内所有课程名中有key的课程"""
+        uid,key,bot,event=kwargs["uid"],kwargs["key"],kwargs["bot"],kwargs["event"]
+        i=0
+        for courses in usertable[uid]["data"]["courses"]:
+            # 遍历当前天的所有存在的课
+            if key in courses["name"]:
+                i+=1
+                if scheduler.get_job(job_id=uid+courses["name"]+str(i)):
+                    continue
+                else:
+                    class_section = int(courses["sections"].split(",")[0])
+                    starttime = eval(usertable[uid]["data"]["setting"]["sectionTimes"])[
+                        class_section-1]["s"]#获取课程开始时间
+                    hours = int(timetable_send_time)#从设置中获取提前的小时数
+                    minutes = int((timetable_send_time - hours) * 60)#从设置中获取提前的分钟数
+                    time_obj = datetime.datetime.strptime(starttime, "%H:%M")#将字符串转换为datetime
+                    new_time_obj = time_obj - datetime.timedelta(hours=hours, minutes=minutes)#进行时间的运算
+                    sub_hour=new_time_obj.hour#获取发送时间的小时
+                    sub_minute=new_time_obj.minute#获取发送时间的分钟
+                    sub_day=courses["day"]
+                    scheduler.add_job(cls.send_sub_class,"cron",id=uid+courses["name"]+str(i), hour=sub_hour, minute=sub_minute, day_of_week=sub_day, second=random.randint(
+                        0, 60), misfire_grace_time=60, kwargs={"uid": uid, "bot": bot, "event": event,"course":{"name":courses["name"],"position":courses["position"],"teacher":courses["teacher"]}})
+        return f"成功订阅了{i}节课喵~"
     
+    @classmethod
+    def remove_sub_class(cls,**kwargs):
+        uid,key=kwargs["uid"],kwargs["key"]
+        i=0
+        for courses in usertable[uid]["data"]["courses"]:
+            # 遍历当前天的所有存在的课
+            if key in courses["name"]:
+                i+=1
+                if scheduler.get_job(job_id=uid+courses["name"]+str(i)):
+                    scheduler.remove_job(job_id=uid+courses["name"]+str(i))
+                else:
+                    continue
+                
+                
+        return f"成功取消订阅{i}节课喵~"
+    @classmethod
+    async def send_sub_class(cls,**kwargs):
+        """发送订阅课程"""
+        uid,bot,event,course=kwargs["uid"],kwargs["bot"],kwargs["event"],kwargs["course"]
+        try:
+            msg = "现在时间是"+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            msg+="\n还有{}小时，你订阅的课程就要开始啦！课程信息如下喵：\n{}\n{}\n{}".format(timetable_send_time,course["name"],course["position"],course["teacher"])
+            await bot.send(event, message=MessageSegment.at(uid)+msg, at_sender=True)
+        except ActionFailed as e:
+            logger.warning(f"发送消息给{event.get_user_id}失败：{e}")
+        
+        
+        

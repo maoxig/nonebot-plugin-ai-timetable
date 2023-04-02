@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "nonebot-plugin-ai-timetable"
-version = "0.2.4"
-description = ""
-authors = ["Your Name <you@example.com>"]
+version = "0.3.0"
+description = "小爱课程表"
+authors = ["maoxiog <674550338@qq.com>"]
 readme = "README.md"
 packages = [{include = "nonebot_plugin_ai_timetable"}]
 
