@@ -14,7 +14,7 @@
    这是本人第一次在github发布的项目，也是第一个python项目，完全是萌新，很多地方写的可能很拉，大佬轻喷
 目前还不是很完善，有什么bug或者建议欢迎提issues
 
-## 安装
+## 💿安装
 
 1. 通过`pip`或`nb`安装；
     - 使用nb(极度推荐)
@@ -27,7 +27,7 @@
 
 2. 本地数据保存在`data/ai_timetable/userdata.json`以及`data/ai_timetable/usertable.json`，分别对应用户发送的链接和本地保存的课表
 
-## 简介
+## 📖简介
 
 1. 傻瓜式一键导入小爱课表，让你的bot实现小爱课表的功能
 
@@ -35,7 +35,7 @@
 
 3. ~~所以为什么不直接用小爱课表呢~~
 
-4. 插件配置
+4. ⚙️插件配置
 
 这些配置都已设好默认值，如果想要修改配置，在机器人目录下的.env.*里面可以填写以下选项(可选)
 
@@ -46,7 +46,7 @@
 |    TIMETABLE_ALOCK_8    |  int  |   21    |    TIMETABLE_ALOCK_8=16    | 订阅早八的发送时间，必须是0-24的数字.这里发送的都是第二天的，所以建议设置为18-23点 |
 |    TIMETABLE_SEND_TIME    |  float  |   0.5    |    TIMETABLE_SEND_TIME=1    | 订阅课程提前发送的时间，单位是`小时`，可以是整数也可以是小数，建议不要设的太大，避免出现无法预料的bug |
 
-## 依赖
+## 💿依赖
 
 ```python
 nb plugin install nonebot_plugin_htmlrender
@@ -57,7 +57,7 @@ nb plugin install nonebot_plugin_apscheduler
 
 不安装[nonebot_plugin_apscheduler](https://github.com/nonebot/plugin-apscheduler)会无法使用定时任务,其他功能无影响
 
-## 更新日志
+## 🌙更新日志
 
 <details>
 <summary>点击展开</summary>
@@ -104,9 +104,14 @@ nb plugin install nonebot_plugin_apscheduler
 3. 定时任务随机延后0-60s，防止风控
 4. 增加订阅指定课程的功能
 
+- 2023-04-14:
+
+1. 修复了订阅课程发送时间错误的bug
+2. 删去了文本中所有奇怪的口癖喵
+
 </details>
 
-## 命令
+## 🎉命令
 
 1. 我的课表|小爱课表|本周课表|下周课表：获取本周|下周的完全课表，使用前须先导入课表，这里的课表是在线课表
 
@@ -134,7 +139,7 @@ nb plugin install nonebot_plugin_apscheduler
 
 未完待续
 
-## 效果图
+## ⭐效果图
 
 ![Image text](https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/resource/my_table.jpg)
 ![Image text](https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/resource/alock_8.jpg)
@@ -156,7 +161,7 @@ nb plugin install nonebot_plugin_apscheduler
 
 ![Image text](https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/resource/settings.jpg)
 
-## 计划
+## 🐦计划
 
 - [x] 查询下节课的信息
 
@@ -170,10 +175,10 @@ nb plugin install nonebot_plugin_apscheduler
 
 - [ ] 完善插件
 
-## 存在的问题
+## 🐛存在的问题
 
  1. 小爱课表分享的链接大概2周后会过期，会使得`我的课表\下周课表`无法使用，需要重新分享，但是仍能使用本地课表，也可以更新本地课表
 
  2. 机器人重启后定时任务会丢失
 
-## 喜欢的话就点个star吧QAQ
+## 喜欢的话就点个star✨吧QAQ

@@ -82,7 +82,7 @@ class AiTimetable:
                 if eval(usertable[uid]["data"]["setting"]["sectionTimes"])[next_class_section-1]["s"] > now_time:
                     return "\n你今天的下一节课程信息为：\n"+eval(usertable[uid]["data"]["setting"]["sectionTimes"])[next_class_section-1]["s"]+"-"+eval(usertable[uid]["data"]["setting"]["sectionTimes"])[next_class_section_end-1]["e"]+"\n"+courses["name"]+"\n@"+courses["position"]+"\n"+courses["teacher"]
                 #这里是因为之前已经按照顺序排好了课程,所以第一个找到的就是下节课
-        return "\n你今天接下来没有课了呢,好好享受吧喵~"
+        return "\n你今天接下来没有课了呢,好好休息吧"
     @classmethod
     def now_class(cls, uid) -> str:
         """ 
@@ -101,13 +101,13 @@ class AiTimetable:
             count = 0
             for courses in usertable[uid]["data"]["courses"]:
                 if (str(presentweek) in courses["weeks"].split(",")) and (today == courses["day"]) and (str(now_section) in courses["sections"].split(",")):
-                    msg += "\n你现在在上的课程信息如下喵:\n"+eval(usertable[uid]["data"]["setting"]["sectionTimes"])[int(courses["sections"].split(",")[0])-1]["s"]+"-"+eval(
+                    msg += "\n你现在在上的课程信息如下:\n"+eval(usertable[uid]["data"]["setting"]["sectionTimes"])[int(courses["sections"].split(",")[0])-1]["s"]+"-"+eval(
                         usertable[uid]["data"]["setting"]["sectionTimes"])[int(courses["sections"].split(",")[-1])-1]["e"]+'\n'+courses["name"]+"\n@"+courses["position"]+"\n"+courses["teacher"]
                     count += 1
             if not count:
-                msg += "\n你现在没有课呢,空闲时间好好休息吧喵~"
+                msg += "\n你现在没有课呢,空闲时间好好休息吧"
         else:
-            msg += "\n你现在没有课呢,空闲时间好好休息吧喵~"
+            msg += "\n你现在没有课呢,空闲时间好好休息吧"
         return msg
     @classmethod
     def table_msg(cls, key, uid) -> str:
@@ -128,7 +128,7 @@ class AiTimetable:
         if timetable_pic:
             msg = "|时间|课程|地点|\n| :-----| :----: | :----: |"
         else:
-            msg = "你要的课表来咯喵"
+            msg = "课表来了~"
         for courses in usertable[uid]["data"]["courses"]:
             if(courses["day"] == someday) and (str(presentweek) in courses["weeks"].split(',')):
 
@@ -195,7 +195,7 @@ class AiTimetable:
                         #对课表排序
                         await cls.write_table()
                         await cls.write_data()
-                        return "成功导入课表喵"
+                        return "成功导入课表！"
                 else:
                     return "出错了，可能是没有在小爱课表内登录账户"
         except Exception as e:
@@ -215,9 +215,9 @@ class AiTimetable:
                         #对课表排序
                 await cls.write_table()
                 await cls.write_data()
-                return "更新成功喵"
+                return "更新成功"
         except Exception as e:
-            return f"出错了喵：{e}"
+            return f"{e}"
 
     @classmethod
     async def someday_table(cls,uid,key): 
@@ -243,7 +243,7 @@ class AiTimetable:
                 someday=1
                 someweek=someweek+1  
             count=0
-            msg="我来了喵!"
+            msg = "现在时间是"+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             for courses in usertable[uid]["data"]["courses"]:
                 if (courses["day"] == someday) and str(someweek) in courses["weeks"].split(",") and "1" in courses["sections"].split(","):
                     count+=1
@@ -254,7 +254,7 @@ class AiTimetable:
                 msg+=f"\n你明天有{count}节早八呢！今晚早点休息吧！"
             await bot.send(event,message=msg,at_sender=True)
         except ActionFailed as e:
-            logger.warning(f"发送消息给{event.get_user_id}失败：{e}")
+            logger.warning(f"发送消息给{event.get_user_id()}失败：{e}")
     @classmethod
     async def post_alock(cls,**kwargs):
         """发送第二天课程消息"""
@@ -284,18 +284,16 @@ class AiTimetable:
                     continue
                 else:
                     class_section = int(courses["sections"].split(",")[0])
-                    starttime = eval(usertable[uid]["data"]["setting"]["sectionTimes"])[
-                        class_section-1]["s"]#获取课程开始时间
+                    starttime = eval(usertable[uid]["data"]["setting"]["sectionTimes"])[class_section-1]["s"]#获取课程开始时间
                     hours = int(timetable_send_time)#从设置中获取提前的小时数
                     minutes = int((timetable_send_time - hours) * 60)#从设置中获取提前的分钟数
                     time_obj = datetime.datetime.strptime(starttime, "%H:%M")#将字符串转换为datetime
                     new_time_obj = time_obj - datetime.timedelta(hours=hours, minutes=minutes)#进行时间的运算
                     sub_hour=new_time_obj.hour#获取发送时间的小时
                     sub_minute=new_time_obj.minute#获取发送时间的分钟
-                    sub_day=courses["day"]
-                    scheduler.add_job(cls.send_sub_class,"cron",id=uid+courses["name"]+str(i), hour=sub_hour, minute=sub_minute, day_of_week=sub_day, second=random.randint(
-                        0, 60), misfire_grace_time=60, kwargs={"uid": uid, "bot": bot, "event": event,"course":{"name":courses["name"],"position":courses["position"],"teacher":courses["teacher"]}})
-        return f"成功订阅了{i}节课喵~"
+                    sub_day=courses["day"]-1
+                    scheduler.add_job(cls.send_sub_class,"cron",id=uid+courses["name"]+str(i), hour=sub_hour, minute=sub_minute, day_of_week=sub_day, second=random.randint(0, 60), misfire_grace_time=60, kwargs={"uid": uid, "bot": bot, "event": event,"course":{"name":courses["name"],"position":courses["position"],"teacher":courses["teacher"]}})
+        return f"成功订阅了{i}节课~"
     
     @classmethod
     def remove_sub_class(cls,**kwargs):
@@ -309,19 +307,17 @@ class AiTimetable:
                     scheduler.remove_job(job_id=uid+courses["name"]+str(i))
                 else:
                     continue
-                
-                
-        return f"成功取消订阅{i}节课喵~"
+        return f"成功取消订阅{i}节课~"
     @classmethod
     async def send_sub_class(cls,**kwargs):
         """发送订阅课程"""
         uid,bot,event,course=kwargs["uid"],kwargs["bot"],kwargs["event"],kwargs["course"]
         try:
             msg = "现在时间是"+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            msg+="\n还有{}小时，你订阅的课程就要开始啦！课程信息如下喵：\n{}\n{}\n{}".format(timetable_send_time,course["name"],course["position"],course["teacher"])
+            msg+="\n还有{}小时，你订阅的课程就要开始啦！课程信息如下:\n{}\n{}\n{}".format(timetable_send_time,course["name"],course["position"],course["teacher"])
             await bot.send(event, message=MessageSegment.at(uid)+msg, at_sender=True)
         except ActionFailed as e:
-            logger.warning(f"发送消息给{event.get_user_id}失败：{e}")
+            logger.warning(f"发送消息给{event.get_user_id()}失败：{e}")
         
         
         

@@ -78,7 +78,7 @@ async def _(event: MessageEvent, key: str = RegexMatched()):
     """发送某天的课表"""
     uid = event.get_user_id()
     if uid not in userdata:
-        await someday_table.finish('你还没有导入课表喵,发送/导入课表来导入吧！', at_sender=True)
+        await someday_table.finish('你还没有导入课表,发送/导入课表来导入吧！', at_sender=True)
     else:
         if timetable_pic:
             pic = await AiTimetable.someday_table(uid=uid, key=key)
@@ -91,7 +91,7 @@ async def _(event: MessageEvent, key: str = RegexMatched()):
 async def _(event: MessageEvent):
     uid = event.get_user_id()
     if uid not in userdata:
-        await renew_table.finish('你还没有导入课表喵,发送/导入课表来导入吧！', at_sender=True)
+        await renew_table.finish('你还没有导入课表,发送/导入课表来导入吧！', at_sender=True)
     else:
         msg = await AiTimetable.renew_table(uid=uid)
         await renew_table.finish(msg, at_sender=True)
@@ -101,7 +101,7 @@ async def _(event: MessageEvent):
 async def _(event: MessageEvent):
     uid = event.get_user_id()
     if uid not in userdata:
-        await send_next_class.finish('你还没有导入课表喵,发送/导入课表来导入吧！', at_sender=True)
+        await send_next_class.finish('你还没有导入课表,发送/导入课表来导入吧！', at_sender=True)
     else:
         msg = "现在时间是"+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         msg += AiTimetable.now_class(uid)
@@ -114,7 +114,7 @@ async def _(bot: Bot, event: MessageEvent):
     """发送早八"""
     uid = event.get_user_id()
     if uid not in userdata:
-        await send_next_class.finish('你还没有导入课表喵,发送/导入课表来导入吧！', at_sender=True)
+        await send_next_class.finish('你还没有导入课表,发送/导入课表来导入吧！', at_sender=True)
     else:
         await AiTimetable.post_alock_morningclass(uid=uid, bot=bot, event=event)
 
@@ -126,12 +126,12 @@ async def _(bot: Bot, event: MessageEvent, key: str = RegexMatched()):
     """订阅课表"""
     uid = event.get_user_id()
     if uid not in userdata:
-        await add_alock_someday.finish('你还没有导入课表喵,发送/导入课表来导入吧！', at_sender=True)
+        await add_alock_someday.finish('你还没有导入课表,发送/导入课表来导入吧！', at_sender=True)
     else:
         if scheduler:
             send_day = (AiTimetable.weekday_int(key)+5) % 7
             if scheduler.get_job(str(uid+"post_alock"+str(send_day))):
-                await add_alock_someday.finish("出错了喵！你好像已经订阅过这天的课表了呢", at_sender=True)
+                await add_alock_someday.finish("出错了！你好像已经订阅过这天的课表了呢", at_sender=True)
             scheduler.add_job(AiTimetable.post_alock, "cron", hour=timetable_alock_someday, second=random.randint(0, 60), id=str(
                 uid+"post_alock"+str(send_day)), day_of_week=send_day, misfire_grace_time=60, kwargs={"key": key, "uid": uid, "bot": bot, "event": event})
             await add_alock_someday.finish("定时提醒添加成功！", at_sender=True)
@@ -144,7 +144,7 @@ async def _(bot: Bot, event: MessageEvent, key: str = RegexMatched()):
     """删除订阅课表"""
     uid = event.get_user_id()
     if uid not in userdata:
-        await add_alock_someday.finish('你还没有导入课表,发送//导入课表来导入吧！', at_sender=True)
+        await add_alock_someday.finish('你还没有导入课表,发送/导入课表来导入吧！', at_sender=True)
     else:
         if scheduler:
             send_day = (AiTimetable.weekday_int(key)+5) % 7
@@ -163,16 +163,16 @@ async def _(bot: Bot, event: MessageEvent, key: str = RegexMatched()):
 async def _(bot: Bot, event: MessageEvent):
     uid = event.get_user_id()
     if uid not in userdata:
-        await add_alock_morningcalss.finish('你还没有导入课表喵,发送/导入课表来导入吧！', at_sender=True)
+        await add_alock_morningcalss.finish('你还没有导入课表,发送/导入课表来导入吧！', at_sender=True)
     else:
         if scheduler:
             if scheduler.get_job(str(uid+"post_alock_morningclass")):
-                await add_alock_morningcalss.finish("出错了喵！你好像已经订阅过早八提醒了呢", at_sender=True)
+                await add_alock_morningcalss.finish("出错了！你好像已经订阅过早八提醒了呢", at_sender=True)
             scheduler.add_job(AiTimetable.post_alock_morningclass, "cron", hour=timetable_alock_8, second=random.randint(
                 0, 60), id=str(uid+"post_alock_morningclass"), misfire_grace_time=60, kwargs={"uid": uid, "bot": bot, "event": event})
             await add_alock_morningcalss.finish("定时提醒添加成功！", at_sender=True)
         else:
-            await add_alock_morningcalss.finish("apscheduler插件未载入,无法添加定时提醒喵", at_sender=True)
+            await add_alock_morningcalss.finish("apscheduler插件未载入,无法添加定时提醒", at_sender=True)
 
 
 @remove_alock_morningclass.handle()
@@ -197,7 +197,7 @@ async def _(matcher:Matcher,args: Message = CommandArg()):
         matcher.set_arg("text",args)
 
 
-@sub_class.got("text", prompt="请告诉我课程名喵~")
+@sub_class.got("text", prompt="请告诉我课程名~")
 async def sub_handler(bot: Bot, event: MessageEvent,text:str=ArgPlainText()):
     uid = event.get_user_id()
     if uid not in userdata:
@@ -207,7 +207,7 @@ async def sub_handler(bot: Bot, event: MessageEvent,text:str=ArgPlainText()):
             msg = AiTimetable.sub_class(uid=uid, key=text, event=event, bot=bot)
             await sub_class.finish(msg, at_sender=True)
         else:
-            await sub_class.finish("apscheduler插件未载入,无法添加定时提醒喵", at_sender=True)
+            await sub_class.finish("apscheduler插件未载入,无法添加定时提醒", at_sender=True)
 
 
 @remove_sub_class.handle()
@@ -216,7 +216,7 @@ async def _(matcher:Matcher,args: Message = CommandArg()):
         matcher.set_arg("text",args)
 
 
-@remove_sub_class.got("text", prompt="请告诉我课程名喵~")
+@remove_sub_class.got("text", prompt="请告诉我课程名~")
 async def remove_sub_handler(event: MessageEvent,text:str=ArgPlainText()):
     uid = event.get_user_id()
     if uid not in userdata:
@@ -226,4 +226,4 @@ async def remove_sub_handler(event: MessageEvent,text:str=ArgPlainText()):
             msg = AiTimetable.remove_sub_class(uid=uid, key=text)
             await remove_sub_class.finish(msg, at_sender=True)
         else:
-            await remove_sub_class.finish("apscheduler插件未载入,无法添加定时提醒喵", at_sender=True)
+            await remove_sub_class.finish("apscheduler插件未载入,无法添加定时提醒", at_sender=True)
