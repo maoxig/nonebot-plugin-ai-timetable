@@ -133,7 +133,7 @@ async def _(bot: Bot, event: MessageEvent, key: str = RegexMatched()):
             if scheduler.get_job(str(uid+"post_alock"+str(send_day))):
                 await add_alock_someday.finish("出错了！你好像已经订阅过这天的课表了呢", at_sender=True)
             scheduler.add_job(AiTimetable.post_alock, "cron", hour=timetable_alock_someday, second=random.randint(0, 60), id=str(
-                uid+"post_alock"+str(send_day)), day_of_week=send_day, misfire_grace_time=60, kwargs={"key": key, "uid": uid, "bot": bot, "event": event})
+                uid+"post_alock"+str(send_day)), day_of_week=send_day,kwargs={"key": key, "uid": uid, "bot": bot, "event": event})
             await add_alock_someday.finish("定时提醒添加成功！", at_sender=True)
         else:
             await add_alock_someday.finish("apscheduler插件未载入,无法添加定时提醒", at_sender=True)
@@ -169,7 +169,7 @@ async def _(bot: Bot, event: MessageEvent):
             if scheduler.get_job(str(uid+"post_alock_morningclass")):
                 await add_alock_morningcalss.finish("出错了！你好像已经订阅过早八提醒了呢", at_sender=True)
             scheduler.add_job(AiTimetable.post_alock_morningclass, "cron", hour=timetable_alock_8, second=random.randint(
-                0, 60), id=str(uid+"post_alock_morningclass"), misfire_grace_time=60, kwargs={"uid": uid, "bot": bot, "event": event})
+                0, 60), id=str(uid+"post_alock_morningclass"), kwargs={"uid": uid, "bot": bot, "event": event})
             await add_alock_morningcalss.finish("定时提醒添加成功！", at_sender=True)
         else:
             await add_alock_morningcalss.finish("apscheduler插件未载入,无法添加定时提醒", at_sender=True)

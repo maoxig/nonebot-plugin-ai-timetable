@@ -46,7 +46,7 @@ class AiTimetable:
     res_url_re = r'^(https://i\.ai\.mi\.com/course-multi/table\?)*(ctId=)\d+(&userId=)\d*[1-9]\d*(&deviceId=)[0-9a-zA-Z]*(&sourceName=course-app-browser)'
     base_url_re = r'https://cdn\.cnbj1\.fds\.api\.mi-img.com/miai-fe-aischedule-wx-redirect-fe/redirect.html\?linkToken=.+'
 
-    ai_timetable__usage = "## 小爱课表帮助:\n- 我的/本周课表: 获取本周课表,也可以是下周\n- 导入课表: 使用小爱课程表分享的链接一键导入\n- 某日课表: 获取某日课表,如今日课表、周一课表\n- 更新课表: 更新本地课表信息,如果线上修改过小爱课表,发送该指令即可更新本地课表\n- 订阅/取消订阅xx课表: 可以订阅某天(如周一)的课表,在前一天晚上10点推送\n- 订阅/取消订阅早八: 订阅所有早八,在前一天晚上发出提醒\n- 上课/下节课: 获取当前课程信息以及今天以内的下节课信息\n- 早八|明日早八: 查询明天的早八"
+    ai_timetable__usage = "## 小爱课表帮助:\n- 我的/本周课表: 获取本周课表,也可以是下周\n- 导入课表: 使用小爱课程表分享的链接一键导入\n- 某日课表: 获取某日课表,如今日课表、周一课表\n- 更新课表: 更新本地课表信息,如果线上修改过小爱课表,发送该指令即可更新本地课表\n- 订阅/取消订阅xx课表: 可以订阅某天(如周一)的课表,在前一天晚上10点推送\n- 订阅/取消订阅早八: 订阅所有早八,在前一天晚上发出提醒\n- 订阅/取消订阅课程+课程名：订阅某节课程\n- 上课/下节课: 获取当前课程信息以及今天以内的下节课信息\n- 早八|明日早八: 查询明天的早八"
 
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36 Edg/110.0.1587.63'
@@ -150,15 +150,17 @@ class AiTimetable:
 
     @staticmethod
     async def my_table(uid, key):
-        """获取本周或者下周课表"""
+        """
+        获取本周或者下周课表
+        """
         try:
-            async with get_new_page(viewport={"width": 1000, "height": 1200}) as page:
+            async with get_new_page(viewport={"width": 1000, "height": 1000}) as page:
                 await page.goto(userdata[uid][0],wait_until="networkidle")
                 # 这里使小爱课程表的导入按钮隐藏,防止遮挡课表
                 await page.evaluate('var t = document.querySelector("#root>div>div.importSchedule___UjEKt>div.footer___1iAis.toUp___2mciB"); t.style.display = "none"')
                 if '下' in key:  # 如果命令中有下字,就点击下一周的按钮
                     await page.click("#schedule-view > div.header___26sI1 > div.presentWeek___-o65e > div.rightBtn___2ZhSY")
-                pic = await page.screenshot(full_page=True,type="png")
+                pic = await page.screenshot(full_page=True,type="jpeg",quality=70)
                 return pic
         except Exception as e:
             logger.warning(f"获取课表时出错：{e}")
@@ -204,7 +206,9 @@ class AiTimetable:
             
     @classmethod
     async def renew_table(cls,uid):
-        """用户已有url的情况下更新本地课表"""
+        """
+        用户已有url的情况下更新本地课表
+        """
         try:
             async with httpx.AsyncClient() as client:
                 res=await client.get(userdata[uid][1],headers=cls.headers)
@@ -292,7 +296,7 @@ class AiTimetable:
                     sub_hour=new_time_obj.hour#获取发送时间的小时
                     sub_minute=new_time_obj.minute#获取发送时间的分钟
                     sub_day=courses["day"]-1
-                    scheduler.add_job(cls.send_sub_class,"cron",id=uid+courses["name"]+str(i), hour=sub_hour, minute=sub_minute, day_of_week=sub_day, second=random.randint(0, 60), misfire_grace_time=60, kwargs={"uid": uid, "bot": bot, "event": event,"course":{"name":courses["name"],"position":courses["position"],"teacher":courses["teacher"]}})
+                    scheduler.add_job(cls.send_sub_class,"cron",id=uid+courses["name"]+str(i), hour=sub_hour, minute=sub_minute, day_of_week=sub_day, second=random.randint(0, 60),kwargs={"uid": uid, "bot": bot, "event": event,"course":{"name":courses["name"],"position":courses["position"],"teacher":courses["teacher"]}})
         return f"成功订阅了{i}节课~"
     
     @classmethod

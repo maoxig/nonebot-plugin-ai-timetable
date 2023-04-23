@@ -109,6 +109,11 @@ nb plugin install nonebot_plugin_apscheduler
 1. 修复了订阅课程发送时间错误的bug
 2. 删去了文本中所有奇怪的口癖喵
 
+- 2023-04-23:
+
+1. 修改帮助
+2. 修复定时提醒重复发送的bug
+
 </details>
 
 ## 🎉命令
