@@ -7,12 +7,18 @@
 
 ✨*基于Nonebot2的对接小爱课程表的插件*✨
   
-<div align="left">
-  
-# 前言
+<a href="https://github.com/nonebot/nonebot2">
+  <img src="https://img.shields.io/badge/nonebot-v2-red" alt="nonebot">
+</a> 
+<a href="./LICENSE">
+    <img src="https://img.shields.io/github/license/maoxig/nonebot-plugin-ai-timetable" alt="license">
+</a>
+<a href="https://pypi.python.org/pypi/nonebot-plugin-ai-timetable">
+    <img src="https://img.shields.io/pypi/v/nonebot-plugin-ai-timetable" alt="pypi">
+</a>
+<img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="python">
 
-   这是本人第一次在github发布的项目，也是第一个python项目，完全是萌新，很多地方写的可能很拉，大佬轻喷
-目前还不是很完善，有什么bug或者建议欢迎提issues
+<div align="left">
 
 ## 💿安装
 
@@ -39,12 +45,12 @@
 
 这些配置都已设好默认值，如果想要修改配置，在机器人目录下的.env.*里面可以填写以下选项(可选)
 
-|         config          | type  | default |          example           | usage                                                                              |
-| :---------------------: | :---: | :-----: | :------------------------: | :--------------------------------------------------------------------------------- |
-|      TIMETABLE_PIC      | bool  |  true   |    TIMETABLE_PIC=false     | 可选择某日课表以图片/文字发送，默认以图片发送(true)                                |
-| TIMETABLE_ALOCK_SOMEDAY |  int  |   22    | TIMETABLE_ALOCK_SOMEDAY=15 | 订阅某日课表的发送时间，必须是0-24的数字                                           |
-|    TIMETABLE_ALOCK_8    |  int  |   21    |    TIMETABLE_ALOCK_8=16    | 订阅早八的发送时间，必须是0-24的数字.这里发送的都是第二天的，所以建议设置为18-23点 |
-|    TIMETABLE_SEND_TIME    |  float  |   0.5    |    TIMETABLE_SEND_TIME=1    | 订阅课程提前发送的时间，单位是`小时`，可以是整数也可以是小数，建议不要设的太大，避免出现无法预料的bug |
+|         config          | type  | default |          example           | usage                                                                                                 |
+| :---------------------: | :---: | :-----: | :------------------------: | :---------------------------------------------------------------------------------------------------- |
+|      TIMETABLE_PIC      | bool  |  true   |    TIMETABLE_PIC=false     | 可选择某日课表以图片/文字发送，默认以图片发送(true)                                                   |
+| TIMETABLE_ALOCK_SOMEDAY |  int  |   22    | TIMETABLE_ALOCK_SOMEDAY=15 | 订阅某日课表的发送时间，必须是0-24的数字                                                              |
+|    TIMETABLE_ALOCK_8    |  int  |   21    |    TIMETABLE_ALOCK_8=16    | 订阅早八的发送时间，必须是0-24的数字.这里发送的都是第二天的，所以建议设置为18-23点                    |
+|   TIMETABLE_SEND_TIME   | float |   0.5   |   TIMETABLE_SEND_TIME=1    | 订阅课程提前发送的时间，单位是`小时`，可以是整数也可以是小数，建议不要设的太大，避免出现无法预料的bug |
 
 ## 💿依赖
 
@@ -114,6 +120,12 @@ nb plugin install nonebot_plugin_apscheduler
 1. 修改帮助
 2. 修复定时提醒重复发送的bug
 
+- 2023-06-09:
+
+1. 更新插件元数据
+2. 优化配置读取
+3. 格式化代码
+
 </details>
 
 ## 🎉命令
@@ -177,6 +189,8 @@ nb plugin install nonebot_plugin_apscheduler
 - [x] 重构代码
 
 - [x] 订阅指定的课
+
+- [ ] 适配插件datastore，接入数据库
 
 - [ ] 完善插件
 
