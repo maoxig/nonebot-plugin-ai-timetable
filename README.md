@@ -126,6 +126,10 @@ nb plugin install nonebot_plugin_apscheduler
 2. 优化配置读取
 3. 格式化代码
 
+- 2023-06-09:
+
+    更新httpx依赖版本
+
 </details>
 
 ## 🎉命令

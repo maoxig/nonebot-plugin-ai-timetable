@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nonebot-plugin-ai-timetable"
-version = "0.3.4"
+version = "0.3.5"
 description = "小爱课程表"
 authors = ["maoxiog <674550338@qq.com>"]
 readme = "README.md"
@@ -12,7 +12,7 @@ nonebot2 = "^2.0.0rc1"
 nonebot-adapter-onebot = "^2.1.0"
 nonebot-plugin-apscheduler = "^0.2.0"
 nonebot-plugin-htmlrender="^0.2.0"
-httpx = "^0.23.0"
+httpx = "^0.24.0"
 
 
 [build-system]
