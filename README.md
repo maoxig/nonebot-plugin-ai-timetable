@@ -130,6 +130,12 @@ nb plugin install nonebot_plugin_apscheduler
 
     更新httpx依赖版本
 
+- 2023-09-02:
+
+1. 适配nonebot2.0.1版本：移除过时的RegexMatch方法
+
+    >如更新本插件后接受消息无响应，请更新你的nonebot版本或回退到旧版本使用
+
 </details>
 
 ## 🎉命令

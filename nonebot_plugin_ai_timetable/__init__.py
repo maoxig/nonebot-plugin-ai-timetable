@@ -8,7 +8,7 @@ from .utils import (
     usertable,
 )
 from nonebot.plugin import PluginMetadata
-from nonebot.params import RegexMatched, ArgStr, CommandArg, ArgPlainText
+from nonebot.params import RegexStr, ArgStr, CommandArg, ArgPlainText
 from nonebot.matcher import Matcher
 from nonebot import on_command, on_regex
 import datetime
@@ -71,7 +71,7 @@ async def _():
 
 
 @my_table.handle()
-async def _(event: MessageEvent, key: str = RegexMatched()):
+async def _(event: MessageEvent, key: str = RegexStr()):
     """获取本周/下周的课表"""
     uid = event.get_user_id()
     if uid in userdata:
@@ -94,7 +94,7 @@ async def _(event: MessageEvent, key: str = ArgStr()):
 
 
 @someday_table.handle()
-async def _(event: MessageEvent, key: str = RegexMatched()):
+async def _(event: MessageEvent, key: str = RegexStr()):
     """发送某天的课表"""
     uid = event.get_user_id()
     if uid not in userdata:
@@ -145,7 +145,7 @@ async def _(bot: Bot, event: MessageEvent):
 
 
 @add_alock_someday.handle()
-async def _(bot: Bot, event: MessageEvent, key: str = RegexMatched()):
+async def _(bot: Bot, event: MessageEvent, key: str = RegexStr()):
     """订阅课表"""
     uid = event.get_user_id()
     if uid not in userdata:
@@ -170,7 +170,7 @@ async def _(bot: Bot, event: MessageEvent, key: str = RegexMatched()):
 
 
 @remove_alock_someday.handle()
-async def _(bot: Bot, event: MessageEvent, key: str = RegexMatched()):
+async def _(bot: Bot, event: MessageEvent, key: str = RegexStr()):
     """删除订阅课表"""
     uid = event.get_user_id()
     if uid not in userdata:

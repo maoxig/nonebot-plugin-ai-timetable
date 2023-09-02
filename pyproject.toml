@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nonebot-plugin-ai-timetable"
-version = "0.3.5"
+version = "0.3.6"
 description = "小爱课程表"
 authors = ["maoxiog <674550338@qq.com>"]
 readme = "README.md"
