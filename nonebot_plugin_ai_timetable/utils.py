@@ -1,8 +1,10 @@
-from nonebot.adapters.onebot.v11 import ActionFailed, MessageSegment
-from nonebot import get_driver, logger, require
+from nonebot import logger, require, get_plugin_config
+from nonebot.exception import ActionFailed
 
 require("nonebot_plugin_htmlrender")
 require("nonebot_plugin_apscheduler")
+require("nonebot_plugin_alconna")
+from nonebot_plugin_alconna import UniMessage
 from nonebot_plugin_apscheduler import scheduler
 from nonebot_plugin_htmlrender import get_new_page, md_to_pic
 import os
@@ -14,8 +16,9 @@ import httpx
 import random
 from .config import Config
 
-global_config = get_driver().config
-config = Config.parse_obj(global_config)
+
+config = get_plugin_config(Config)
+
 if os.path.exists("data/ai_timetable/userdata.json"):
     with open("data/ai_timetable/userdata.json", "r", encoding="utf-8") as f:
         userdata = json.load(f)
@@ -384,7 +387,7 @@ class AiTimetable:
                 msg += "\n你明天没有早八呢！享受夜生活吧！"
             else:
                 msg += f"\n你明天有{count}节早八呢！今晚早点休息吧！"
-            await bot.send(event, message=msg, at_sender=True)
+            await UniMessage.text(msg).send(target=event, bot=bot, at_sender=True)
         except ActionFailed as e:
             logger.warning(f"发送消息给{event.get_user_id()}失败：{e}")
 
@@ -403,9 +406,11 @@ class AiTimetable:
         try:
             if config.timetable_pic:
                 pic = await md_to_pic(md=msg)
-                await bot.send(event, MessageSegment.image(file=pic), at_sender=True)
+                await UniMessage.image(raw=pic).send(
+                    target=event, bot=bot, at_sender=True
+                )
             else:
-                await bot.send(event, message=msg, at_sender=True)
+                await UniMessage.text(msg).send(target=event, bot=bot, at_sender=True)
         except ActionFailed as e:
             logger.warning(f"发送消息失败：{e}")
 
@@ -433,7 +438,9 @@ class AiTimetable:
                         "s"
                     ]  # 获取课程开始时间
                     hours = int(config.timetable_send_time)  # 从设置中获取提前的小时数
-                    minutes = int((config.timetable_send_time - hours) * 60)  # 从设置中获取提前的分钟数
+                    minutes = int(
+                        (config.timetable_send_time - hours) * 60
+                    )  # 从设置中获取提前的分钟数
                     time_obj = datetime.datetime.strptime(
                         starttime, "%H:%M"
                     )  # 将字符串转换为datetime
@@ -495,6 +502,6 @@ class AiTimetable:
                 course["position"],
                 course["teacher"],
             )
-            await bot.send(event, message=MessageSegment.at(uid) + msg, at_sender=True)
+            await UniMessage.text(msg).send(target=event, bot=bot, at_sender=True)
         except ActionFailed as e:
             logger.warning(f"发送消息给{event.get_user_id()}失败：{e}")
