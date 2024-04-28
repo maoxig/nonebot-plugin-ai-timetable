@@ -1,27 +1,21 @@
-from datetime import datetime
-from .model import *
 import re
-import time
 import httpx
+from datetime import datetime
 from typing import Union
 from nonebot.matcher import Matcher
-from nonebot import on_command, on_regex, require, logger, get_plugin_config
+from nonebot import on_command, on_regex, require, get_plugin_config
 from nonebot.adapters import Message, Event, Bot
-from .config import Config
-
 
 require("nonebot_plugin_alconna")
 require("nonebot_plugin_htmlrender")
+
 from nonebot_plugin_htmlrender import get_new_page, md_to_pic
 from nonebot_plugin_alconna import UniMessage
 
-try:
-    from nonebot_plugin_apscheduler import scheduler
-except ImportError:
-    logger.opt(colors=True).info(
-        "未检测到软依赖<y>nonebot_plugin_apscheduler</y>,<r>禁用定时任务功能</r>"
-    )
-    scheduler = None
+from .config import Config
+from .reminder import scheduler
+from .model import User,Course
+from .data_manager import *
 
 __base_url_pattern__ = r"https://cdn\.cnbj1\.fds\.api\.mi-img.com/miai-fe-aischedule-wx-redirect-fe/redirect.html\?linkToken=.+"
 
@@ -126,10 +120,6 @@ async def build_table(uid: str, key: str):
         return "参数匹配失败"
 
 
-async def build_table_for_morning(uid: str):
-    pass
-
-
 async def build_table_for_day(uid: str, day: int):
     """构造某日课表信息"""
     courses = await query_course_by_day(uid, day)
@@ -142,14 +132,10 @@ async def build_table_for_day(uid: str, day: int):
         day -= 7
         week += 1
     courses = [course for course in courses if str(week) in course.weeks.split(",")]
-    msg = "|时间|课程|地点|\n| :-----| :----: | :----: |"
+    msg = "|时间|课程|地点|老师|\n| :-----| :----: | :----: | :----: |\n"
     for course in courses:
-        sections = course.sections.split(",")
-        startsection = int(sections[0])
-        endsection = int(sections[-1])
-        starttime = eval(user.sectionTimes)[startsection - 1]["s"]
-        endtime = eval(user.sectionTimes)[endsection - 1]["e"]
-        msg = (msg+ "\n"+ "|"+ starttime+ "-"+ endtime+ "|"+ course.name+ "|"+ course.position)
+        course_msg = await build_table_by_course(course, user)
+        msg += course_msg
     return msg
 
 
@@ -181,10 +167,46 @@ async def build_table_for_next_week(uid: str) -> bytes:
 
 
 async def build_table_for_next_course(uid: str):
-    pass
+    day = weekday_int("今")
+    courses = await query_course_by_day(uid, day)
+    week = await get_current_week(uid, day)
+    user = await query_user_by_uid(uid)
+    now_time = datetime.now().strftime("%H:%M")
+    courses = [course for course in courses if str(week) in course.weeks.split(",")]
+    for course in courses:
+        next_class_section = int(course.sections.split(",")[0])
+        next_class_section_end = int(course.sections.split(",")[-1])
+        msg = "|时间|课程|地点|老师|\n| :-----| :----: | :----: | :----: |\n"
+        if eval(user.sectionTimes)[next_class_section - 1]["s"] > now_time:
+            course_msg = await build_table_by_course(course, user)
+            return msg + course_msg
+
+    return "\n你今天接下来没有课了呢,好好休息吧"
+
+
+async def build_table_by_course(course: Course, user: User) -> str:
+    """根据课程和用户设置，构建md格式的课程行"""
+    sections = course.sections.split(",")
+    startsection = int(sections[0])
+    endsection = int(sections[-1])
+    starttime = eval(user.sectionTimes)[startsection - 1]["s"]
+    endtime = eval(user.sectionTimes)[endsection - 1]["e"]
+    msg = f"|{starttime}-{endtime}|{course.name}|{course.position}|{course.teacher}|\n"
+    return msg
 
 
 async def build_table_for_some_course(uid: str, key: str):
+    courses = await query_course_by_name(uid, key)
+    user = await query_user_by_uid(uid)
+    for course in courses:
+        course_msg=await build_table_by_course(course,user)
+
+
+async def build_table_for_morning(uid: str):
+    pass
+
+
+async def build_table_current_course(uid: str):
     pass
 
 
