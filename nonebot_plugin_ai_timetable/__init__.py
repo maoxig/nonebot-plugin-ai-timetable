@@ -1,28 +1,23 @@
 from nonebot.plugin import PluginMetadata, inherit_supported_adapters
 from nonebot.params import (
-    RegexStr,
     ArgStr,
     CommandArg,
     ArgPlainText,
     Depends,
-    RawCommand,
 )
 from nonebot.matcher import Matcher
 from nonebot import on_command, on_regex, require, logger, get_plugin_config
 from nonebot.adapters import Message, Event, Bot
-import re
-from typing import Union
+
 
 require("nonebot_plugin_alconna")
 require("nonebot_plugin_orm")
 require("nonebot_plugin_apscheduler")
 require("nonebot_plugin_htmlrender")
-from nonebot_plugin_htmlrender import get_new_page, md_to_pic
+
 from nonebot_plugin_alconna import UniMessage
 
 from .config import Config
-
-# from .model import User, Job, Course
 from .manager import (
     check_scheduler,
     check_user,
@@ -49,20 +44,13 @@ __plugin_meta__ = PluginMetadata(
 table_help = on_command(
     "课表帮助", priority=20, block=False, aliases={"课表介绍", "课表怎么用"}
 )
-week_table = on_command(
-    "我的课表", aliases={"本周课表", "我的课表"}, priority=20, block=False
-)
-next_week_table = on_command("下周课表", priority=20, block=False)
-new_table = on_command("导入课表", priority=20, block=False, aliases={"创建课表"})
 
-oneday_table = on_regex(
-    r"^(((今|明|昨|后)(天|日))|(星期|周)(一|二|三|四|五|六|日|天))(课表|的课|课程|((上|有)(什么|啥)课))",
-    priority=20,
-    block=False,
+new_table = on_command("导入课表", priority=20, block=False, aliases={"创建课表"})
+update_offline_table = on_command(
+    "更新课表", priority=20, block=False, aliases={"更新本地课表"}
 )
-next_class = on_command("上课", priority=20, block=False, aliases={"下节课"})
-next_morning = on_command(
-    "早八", priority=20, block=False, aliases={"明日早八", "明天早八"}
+query_table = on_command(
+    "课表查询", aliases={"查询课表", "查课表"}, priority=20, block=False
 )
 
 
@@ -78,33 +66,13 @@ async def _(matcher: Matcher):
     await send_table(matcher, __ai_timetable__usage__)
 
 
-@week_table.handle(parameterless=[Depends(check_user)])
-async def _(event: Event, text: str = ArgPlainText()):
-    """
-    处理获取本周课表命令，根据用户ID获取当前周的课表并发送
-    """
-    uid = event.get_user_id()
-    pic = await build_table(uid, text)
-    await UniMessage.image(raw=pic).send()
-
-
-@next_week_table.handle(parameterless=[Depends(check_user)])
-async def _(event: Event, text: str = ArgPlainText()):
-    """
-    处理获取下周课表命令，根据用户ID获取下一周的课表并发送
-    """
-    uid = event.get_user_id()
-    pic = await build_table(uid, text)
-    await UniMessage.image(raw=pic).send()
-
-
 @new_table.handle()
 async def _(
     matcher: Matcher,
     args: Message = CommandArg(),
 ):
     """
-    处理更新课表命令，接收小爱课程表导出链接并更新本地课表
+    处理导入课表命令，接收小爱课程表导出链接并更新本地课表
     """
     if args.extract_plain_text():
         matcher.set_arg("key", args)
@@ -116,18 +84,30 @@ async def _(event: Event, key: str = ArgPlainText()):
     获取课表导出链接并更新本地课表
     """
     uid = event.get_user_id()
+    logger.debug("获取的链接：" + key)
     await update_table(uid, key)
+    await new_table.finish("导入成功")
 
 
-@next_class.handle(parameterless=[Depends(check_user)])
-@next_morning.handle(parameterless=[Depends(check_user)])
-@oneday_table.handle(parameterless=[Depends(check_user)])
+@query_table.handle(parameterless=[Depends(check_user)])
+async def _(
+    matcher: Matcher,
+    args: Message = CommandArg(),
+):
+    """
+    处理查询课表命令，根据用户ID和关键词获取指定的课表并发送
+    """
+    if args.extract_plain_text():
+        matcher.set_arg("key", args)
+
+
+@query_table.got(key="key", prompt="查询什么课？")
 async def _(event: Event, matcher: Matcher, key: str = ArgPlainText()):
     """
-    处理获取课表命令，根据用户ID和关键词获取指定的课表并发送
+    处理查询课表命令，根据用户ID和关键词获取指定的课表并发送
     """
     uid = event.get_user_id()
-    logger.warning(key)
+    logger.debug("获取的参数：" + key)
     response = await build_table(uid, key)
     await send_table(matcher, response)
 
@@ -141,14 +121,38 @@ async def _(
     处理添加提醒命令，解析用户输入的提醒内容并进行相应的处理
     """
     if args.extract_plain_text():
-        matcher.set_arg("text", args)
+        matcher.set_arg("key", args)
 
 
-@add_reminder.got(key="text", prompt="添加什么提醒？可以是：早八|某日课程|课程名")
-async def _(bot: Bot, matcher: Matcher, event: Event, text: str = ArgPlainText()):
+@add_reminder.got(key="key", prompt="添加什么提醒？")
+async def _(bot: Bot, matcher: Matcher, event: Event, key: str = ArgPlainText()):
     """
     获取用户输入的提醒内容并进行相应的处理
     """
-    matcher.set_arg("text", text)
+    matcher.set_arg("text", key)
+    logger.debug("提醒参数：" + key)
     uid = event.get_user_id()
-    await add_reminders(uid, text, bot, event, matcher)
+    await add_reminders(uid, key, bot, event, matcher)
+
+
+@remove_reminder.handle(parameterless=[Depends(check_user), Depends(check_scheduler)])
+async def _(
+    matcher: Matcher,
+    args: Message = CommandArg(),
+):
+    """
+    处理删除提醒命令，解析用户输入的提醒内容并进行相应的处理
+    """
+    if args.extract_plain_text():
+        matcher.set_arg("key", args)
+
+
+@remove_reminder.got(key="key", prompt="添加什么提醒？")
+async def _(bot: Bot, matcher: Matcher, event: Event, key: str = ArgPlainText()):
+    """
+    获取用户输入的提醒内容并进行相应的处理
+    """
+    matcher.set_arg("text", key)
+    logger.debug("提醒参数：" + key)
+    uid = event.get_user_id()
+    await add_reminders(uid, key, bot, event, matcher)
