@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Extra
 
 
-class Config(BaseModel, extra=Extra.ignore):
+class Config(BaseModel):
     # 以图片发送
     timetable_pic: bool = True
     # 发送第二天课表的时间
