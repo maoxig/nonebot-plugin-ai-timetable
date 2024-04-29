@@ -14,7 +14,7 @@ from nonebot_plugin_alconna import UniMessage
 
 from .config import Config
 from .reminder import scheduler
-from .model import User,Course
+from .model import User, Course
 from .data_manager import *
 
 __base_url_pattern__ = r"https://cdn\.cnbj1\.fds\.api\.mi-img.com/miai-fe-aischedule-wx-redirect-fe/redirect.html\?linkToken=.+"
@@ -29,12 +29,21 @@ __headers__ = {
 __day_pattern__ = r"((星期|周)([一二三四五六日1-7]))|((今|明|昨|后)(天|日))"
 
 
+"""
+这个文件的函数都是一些工具函数，根据uid和相关参数，构建出所需要的课表信息，同时返回str，
+之后会调用send_table来根据设置决定发送图片还是文字
+
+"""
+
+
 async def check_user(event: Event, matcher: Matcher) -> Event:
+    """检查用户是否在课表系统中"""
     if not await check_user_in_table(event.get_user_id()):
         await matcher.finish("你还没有导入课表，发送/导入课表来导入吧！")
 
 
 async def check_scheduler(event: Event, matcher: Matcher):
+    """检查apscheduler依赖是否存在"""
     if not scheduler:
         await matcher.finish("没有apscheduler，无法使用定时任务功能")
 
@@ -132,11 +141,8 @@ async def build_table_for_day(uid: str, day: int):
         day -= 7
         week += 1
     courses = [course for course in courses if str(week) in course.weeks.split(",")]
-    msg = "|时间|课程|地点|老师|\n| :-----| :----: | :----: | :----: |\n"
-    for course in courses:
-        course_msg = await build_table_by_course(course, user)
-        msg += course_msg
-    return msg
+    courses_msg = await build_table_by_courses_list(courses, user)
+    return courses_msg
 
 
 async def build_table_for_current_week(uid: str) -> bytes:
@@ -172,42 +178,92 @@ async def build_table_for_next_course(uid: str):
     week = await get_current_week(uid, day)
     user = await query_user_by_uid(uid)
     now_time = datetime.now().strftime("%H:%M")
-    courses = [course for course in courses if str(week) in course.weeks.split(",")]
-    for course in courses:
-        next_class_section = int(course.sections.split(",")[0])
-        next_class_section_end = int(course.sections.split(",")[-1])
-        msg = "|时间|课程|地点|老师|\n| :-----| :----: | :----: | :----: |\n"
-        if eval(user.sectionTimes)[next_class_section - 1]["s"] > now_time:
-            course_msg = await build_table_by_course(course, user)
-            return msg + course_msg
-
-    return "\n你今天接下来没有课了呢,好好休息吧"
+    courses = [
+        course
+        for course in courses
+        if str(week) in course.weeks.split(",")
+        and eval(user.sectionTimes)[int(course.sections.split(",")[0]) - 1]["s"]
+        > now_time
+    ]
+    if not courses:
+        return "\n你今天接下来没有课了呢,好好休息吧"
+    return await build_table_by_courses_list(courses, user)
 
 
 async def build_table_by_course(course: Course, user: User) -> str:
-    """根据课程和用户设置，构建md格式的课程行"""
+    """根据课程和用户设置，构建md格式的课程行，不带换行符"""
     sections = course.sections.split(",")
     startsection = int(sections[0])
     endsection = int(sections[-1])
     starttime = eval(user.sectionTimes)[startsection - 1]["s"]
     endtime = eval(user.sectionTimes)[endsection - 1]["e"]
-    msg = f"|{starttime}-{endtime}|{course.name}|{course.position}|{course.teacher}|\n"
+    msg = f"|{starttime}-{endtime}|{course.name}|{course.position}|{course.teacher}|"
+    return msg
+
+
+async def build_table_by_courses_list(courses: List[Course], user: User) -> str:
+    """根据一个课程列表，构建一个md表格形式的课程表，带表头信息"""
+    msg = "|时间|课程|地点|老师|\n| :-----| :----: | :----: | :----: |:----: |\n"
+    for course in courses:
+        course_msg = await build_table_by_course(course, user)
+        msg += f"{course_msg}\n"
     return msg
 
 
 async def build_table_for_some_course(uid: str, key: str):
+    """根据用户查询的课程名，返回一系列的课程表"""
     courses = await query_course_by_name(uid, key)
     user = await query_user_by_uid(uid)
-    for course in courses:
-        course_msg=await build_table_by_course(course,user)
+
+    courses_msg = await build_table_by_courses_list(courses, user)
+    return courses_msg
 
 
 async def build_table_for_morning(uid: str):
-    pass
-
+    """为用户构建出第二天早八的相关信息"""
+    day = weekday_int("明")
+    courses = await query_course_by_day(uid, day)
+    week = await get_current_week(uid, day)
+    user = await query_user_by_uid(uid)
+    if day < 0:
+        day += 7
+        week -= 1
+    elif day > 7:
+        day -= 7
+        week += 1
+    courses = [
+        course
+        for course in courses
+        if str(week) in course.weeks.split(",")
+        and str(week) in course.weeks.split(",")
+        and "1" in course.sections.split(",")
+    ]  # 从当天的课中选出当周的
+    if not courses:
+        return "你明天没有早八呢！享受夜生活吧！"
+    return await build_table_by_courses_list(courses,user)
 
 async def build_table_current_course(uid: str):
-    pass
+    """获取现在的课程信息"""
+    day = weekday_int("今")
+    courses = await query_course_by_day(uid, day)
+    week = await get_current_week(uid, day)
+    courses = [
+        course for course in courses if str(week) in course.weeks.split(",")
+    ]  # 从当天的课中选出当周的
+
+    user = await query_user_by_uid(uid)
+    now_time = datetime.now().strftime("%H:%M")
+    now_section = 0
+    for course_time in eval(user.sectionTimes):
+        if course_time["s"] < now_time < course_time["e"]:
+            now_section = course_time["i"]
+    if not now_section:
+        return "你现在没有课呢, 空闲时间好好休息吧"
+    courses = [
+        course for course in courses if str(now_section) in course.sections.split(",")
+    ]  # 从剩下的课中选出本节的
+    course_msg = await build_table_by_courses_list(courses, user)
+    return course_msg
 
 
 async def send_table(matcher: Matcher, table: Union[str, bytes]):
