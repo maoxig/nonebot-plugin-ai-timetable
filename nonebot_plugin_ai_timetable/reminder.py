@@ -69,33 +69,45 @@ async def remove_reminders(uid: str, key: str):
     if re.match(__day_pattern__, key):
         day = weekday_int(
             key
-        )  ##day是1-7的整数，但是也有可能是负数和大于7的数，用于判断周数
+        )  
         job_id = f"{uid},周{day}"
         if scheduler.get_job(job_id):
             scheduler.remove_job(job_id=job_id)
-            return "成功移除了一个提醒"
+            return "成功移除了你的1个提醒"
 
     elif key == "早八":
         count=0
         for i,job in enumerate(scheduler.get_jobs()):
-            if job.id.split(",") and len(job.id.split(","))==2 and "早八" in job.id.split(",")[1]:
+            job_name = job.id.split(",")
+            if job_name and len(job_name) == 2 and uid==job_name[0] and "早八" in job.id.split(",")[1]:
                 count += 1
                 scheduler.remove_job(job_id=job.id)
-        return f"成功移除了{count}个提醒"
+        return f"成功移除了你的{count}个提醒"
     elif key == "全部":
-        scheduler.remove_all_jobs()
-        return "成功移除了全部提醒"
+        count = 0
+        for i, job in enumerate(scheduler.get_jobs()):
+            job_name = job.id.split(",")
+            if (
+                job_name
+                and len(job_name) == 2
+                and uid == job_name[0]
+            ):
+                count += 1
+                scheduler.remove_job(job_id=job.id)
+        return f"成功移除了你的全部{count}提醒"
     else:
         count=0
         for i, job in enumerate(scheduler.get_jobs()):
+            job_name=job.id.split(",")
             if (
-                job.id.split(",")
-                and len(job.id.split(",")) == 2
-                and key in job.id.split(",")[1]
+                job_name
+                and len(job_name) == 2
+                and uid == job_name[0]
+                and key in job_name[1]
             ):
                 count+=1
                 scheduler.remove_job(job_id=job.id)
-        return f"成功移除了{count}个提醒"
+        return f"成功移除了你的{count}个提醒"
 
     return f"没有找到名为{key}的提醒"
 
