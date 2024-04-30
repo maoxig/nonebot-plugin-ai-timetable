@@ -7,7 +7,7 @@ __pycache__/
 *.so
 
 #resource
-resource
+#resource
 # Distribution / packaging
 .Python
 build/
