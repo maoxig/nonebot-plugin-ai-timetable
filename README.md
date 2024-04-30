@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://v2.nonebot.dev/"><img src="https://v2.nonebot.dev/logo.png" width="200" height="200" alt="nonebot"></a>
+  <a href="https://nonebot.dev/"><img src="https://nonebot.dev/logo.png" width="200" height="200" alt="nonebot"></a>
 </p>
 <div align="center">
 
@@ -170,7 +170,6 @@ nb plugin install nonebot_plugin_orm
 ![Image text](https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/resource/query1.png)
 ![Image text](https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/resource/reminder.png)
 ![Image text](https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/resource/reminder1.png)
-![Image text](https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/resource/someday_classes.jpg)
 ![Image text](https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/resource/someday_classes_pic.jpg)
 
 ### 关于小爱课程表内的一些说明
@@ -222,5 +221,12 @@ nb plugin install nonebot_plugin_orm
 
 所以，暂时还无法解决定时任务的持久化存储问题，除非apscheduler正式发版4.0（目前还是alpha版本），你可以再等待，本插件会持续跟进更新。
 
-
-## 喜欢的话就点个star✨吧QAQ
+## 🎉致谢
+- 感谢[nonebot-plugin-htmlrender](https://github.com/kexue-z/nonebot-plugin-htmlrender)提供的渲染工具
+- 感谢[plugin-orm](https://github.com/nonebot/plugin-orm)提供的异步数据库接口
+- 感谢[nonebot-plugin-apscheduler](https://github.com/nonebot/plugin-apscheduler)提供的定时任务接口
+- 感谢[nonebot-plugin-alconna](https://github.com/nonebot/plugin-alconna)
+- 感谢[Matcha](https://github.com/A-kirami/matcha)提供的简单好用的测试平台
+### 喜欢的话就点个star✨吧
+或者, 你也可以看我写的其他插件
+[nonebot-plugin-manga-translator](https://github.com/maoxig/nonebot-plugin-manga-translator)一个支持多api, 方便好用的图片/漫画翻译插件
