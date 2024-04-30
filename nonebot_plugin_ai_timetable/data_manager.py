@@ -1,3 +1,4 @@
+from datetime import datetime
 from sqlalchemy import (
     select,
 )
@@ -7,8 +8,9 @@ from sqlalchemy.orm import selectinload
 require("nonebot_plugin_orm")
 from nonebot_plugin_orm import get_session
 from typing import List
-from .model import User,Course
+from .model import User, Course
 import time
+
 
 async def add_user(user_id: str, base_url: str, response_url: str, user_data: dict):
     """在数据库中添加新用户,user_data是返回数据中的data部分"""
@@ -163,3 +165,25 @@ async def check_user_in_table(user_id: str) -> bool:
     if row is None:
         logger.debug("不存在该用户")
     return row is not None
+
+
+def weekday_int(key) -> int:
+    """中文日期转数字"""
+    cn2an = {
+        "今": datetime.now().weekday() + 1,
+        "明": datetime.now().weekday() + 2,
+        "昨": datetime.now().weekday(),
+        "后": datetime.now().weekday() + 3,
+        "一": 1,
+        "二": 2,
+        "三": 3,
+        "四": 4,
+        "五": 5,
+        "六": 6,
+        "日": 7,
+        "天": 7,
+    }
+    for i in cn2an:
+        if i in key:
+            return cn2an[i]
+    return 7

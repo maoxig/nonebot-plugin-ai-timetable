@@ -19,14 +19,18 @@ from nonebot_plugin_alconna import UniMessage
 
 from .config import Config
 from .manager import (
-    check_scheduler,
     check_user,
     check_base_url,
     build_table,
     send_table,
     update_table,
 )
-from .reminder import add_reminders
+from .reminder import (
+    check_scheduler,
+    add_reminders,
+    remove_reminders,
+    query_reminders_by_uid,
+)
 
 __ai_timetable__usage__ = "## 小爱课表帮助:\n- 我的/本周课表: 获取本周课表,也可以是下周\n- 导入课表: 使用小爱课程表分享的链接一键导入\n- 某日课表: 获取某日课表,如今日课表、周一课表\n- 更新课表: 更新本地课表信息,如果线上修改过小爱课表,发送该指令即可更新本地课表\n- 订阅/取消订阅xx课表: 可以订阅某天(如周一)的课表,在前一天晚上10点推送\n- 订阅/取消订阅早八: 订阅所有早八,在前一天晚上发出提醒\n- 订阅/取消订阅课程+课程名：订阅某节课程\n- 上课/下节课: 获取当前课程信息以及今天以内的下节课信息\n- 早八|明日早八: 查询明天的早八"
 
@@ -56,6 +60,7 @@ query_table = on_command(
 
 add_reminder = on_command("添加课程提醒", priority=20, block=False)
 remove_reminder = on_command("删除课程提醒", priority=20, block=False)
+query_reminder = on_command("查看课程提醒", priority=20, block=False)
 
 
 @table_help.handle()
@@ -129,10 +134,11 @@ async def _(bot: Bot, matcher: Matcher, event: Event, key: str = ArgPlainText())
     """
     获取用户输入的提醒内容并进行相应的处理
     """
-    matcher.set_arg("text", key)
+    matcher.set_arg("key", key)
     logger.debug("提醒参数：" + key)
     uid = event.get_user_id()
-    await add_reminders(uid, key, bot, event, matcher)
+    msg = await add_reminders(uid, key, bot, event)
+    await add_reminder.finish(msg)
 
 
 @remove_reminder.handle(parameterless=[Depends(check_user), Depends(check_scheduler)])
@@ -155,4 +161,15 @@ async def _(bot: Bot, matcher: Matcher, event: Event, key: str = ArgPlainText())
     matcher.set_arg("text", key)
     logger.debug("提醒参数：" + key)
     uid = event.get_user_id()
-    await add_reminders(uid, key, bot, event, matcher)
+    msg = await remove_reminders(uid, key, bot, event)
+    await remove_reminder.finish(msg)
+
+
+@query_reminder.handle(parameterless=[Depends(check_user), Depends(check_scheduler)])
+async def _(matcher: Matcher, event: Event):
+    """
+    处理查询提醒操作
+    """
+    uid = event.get_user_id()
+    msg = await query_reminders_by_uid(uid)
+    await send_table(matcher,msg)
