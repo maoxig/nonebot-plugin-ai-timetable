@@ -55,7 +55,8 @@ async def update_user(user_id: str, base_url: str, response_url: str, user_data:
             user_orm.response_url = response_url
             user_orm.name = user_data["name"]
             # 其他需要更新的用户属性
-            user_orm.courses.clear()
+            for course in user_orm.courses:
+                await session.delete(course)
             user_data["courses"].sort(key=lambda x: int(x["sections"].split(",")[0]))
             for course in user_data["courses"]:
                 course_orm = Course()
@@ -63,9 +64,9 @@ async def update_user(user_id: str, base_url: str, response_url: str, user_data:
                     if hasattr(Course, key):
                         setattr(course_orm, key, value)
                 user_orm.courses.append(course_orm)
-
+                session.add(course_orm)
             # 提交更改
-            session.commit()
+            await session.commit()
 
 
 async def remove_user(user_id: str):
@@ -98,7 +99,9 @@ async def query_user_by_uid(user_id: str) -> User:
 
 
 async def query_course_by_day(user_id: str, day: int) -> List[Course]:
-    """根据用户ID和日期查询课程"""
+    """根据用户ID和日期查询课程
+    参数：
+        day: 周内日期[1,7]"""
     async with get_session() as session:
         # 查询用户
         query = (
@@ -136,7 +139,7 @@ async def query_course_by_name(user_id: str, name: str) -> List[Course]:
 
 
 async def get_current_week(user_id: str, day: int):
-    # 查询用户
+    """根据天数（可能非1-7），返回一个周数，可能是上周、本周、下周"""
     async with get_session() as session:
         query = (
             select(User)
@@ -146,11 +149,14 @@ async def get_current_week(user_id: str, day: int):
         result = await session.execute(query)
         user_orm = result.scalar_one_or_none()
     if user_orm:
-        presentweek = int((time.time() - int(user_orm.startSemester[0:10])) // 604800)
-        +1
-        return presentweek
+        week = int((time.time() - int(user_orm.startSemester[0:10])) // 604800) + 1
+        if day < 0:
+            week -= 1
+        elif day > 7:
+            week += 1
+        return week
     else:
-        return 7
+        return 1
 
 
 async def check_user_in_table(user_id: str) -> bool:

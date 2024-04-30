@@ -3,7 +3,7 @@ import httpx
 from datetime import datetime
 from typing import Union
 from nonebot.matcher import Matcher
-from nonebot import on_command, on_regex, require, get_plugin_config
+from nonebot import require, get_plugin_config
 from nonebot.adapters import Message, Event, Bot
 
 from nonebot_plugin_ai_timetable.data_manager import weekday_int
@@ -91,6 +91,11 @@ async def update_table(uid: str, url: str):
     else:
         await add_user(uid, url, __response_url__, user_data)
 
+async def update_offline_table_by_uid(uid:str):
+    user = await query_user_by_uid(uid)
+    base_url=user.base_url
+    await update_table(uid,base_url)
+
 
 async def build_table(uid: str, key: str) -> Union[bytes, str]:
     """根据用户信息和参数，分发不同的处理函数，根据返回的列表进行处理，返回字符串或图片"""
@@ -171,14 +176,13 @@ async def build_table_for_next_week(uid: str) -> bytes:
 
 async def get_courses_by_day(uid: str, day: int) -> List[Course]:
     """构造某日课表信息"""
-    courses = await query_course_by_day(uid, day)
     week = await get_current_week(uid, day)
     if day < 0:
         day += 7
-        week -= 1
     elif day > 7:
         day -= 7
-        week += 1
+    courses = await query_course_by_day(uid, day)
+
     courses = [course for course in courses if str(week) in course.weeks.split(",")]
 
     return courses
@@ -211,15 +215,12 @@ async def get_courses_by_name(uid: str, key: str) -> List[Course]:
 async def get_courses_for_morning(uid: str) -> List[Course]:
     """为用户构建出第二天早八的所有课程"""
     day = weekday_int("明")
-    courses = await query_course_by_day(uid, day)
     week = await get_current_week(uid, day)
-
     if day < 0:
         day += 7
-        week -= 1
-    elif day > 7:
+    elif day > 7: 
         day -= 7
-        week += 1
+    courses = await query_course_by_day(uid, day)
     courses = [
         course
         for course in courses

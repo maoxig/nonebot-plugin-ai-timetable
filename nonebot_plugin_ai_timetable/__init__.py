@@ -24,6 +24,7 @@ from .manager import (
     build_table,
     send_table,
     update_table,
+    update_offline_table_by_uid
 )
 from .reminder import (
     check_scheduler,
@@ -32,12 +33,12 @@ from .reminder import (
     query_reminders_by_uid,
 )
 
-__ai_timetable__usage__ = "## 小爱课表帮助:\n- 我的/本周课表: 获取本周课表,也可以是下周\n- 导入课表: 使用小爱课程表分享的链接一键导入\n- 某日课表: 获取某日课表,如今日课表、周一课表\n- 更新课表: 更新本地课表信息,如果线上修改过小爱课表,发送该指令即可更新本地课表\n- 订阅/取消订阅xx课表: 可以订阅某天(如周一)的课表,在前一天晚上10点推送\n- 订阅/取消订阅早八: 订阅所有早八,在前一天晚上发出提醒\n- 订阅/取消订阅课程+课程名：订阅某节课程\n- 上课/下节课: 获取当前课程信息以及今天以内的下节课信息\n- 早八|明日早八: 查询明天的早八"
+__ai_timetable__usage__ = "## 小爱课表帮助:\n- 课表帮助：获取本条帮助\n- 导入课表: 使用小爱课程表分享的链接一键导入\n- 更新课表：导入课表后，若云端课表有修改，可直接更新本地课表\n-  查询课表+[参数]：查询[参数]的课表，参数支持[本周/下周、周x、昨天/今天/明天/后天、早八、课程名]\n- 添加课程提醒+[参数]：参数支持[周x、早八、课程名]\n- 删除课程提醒+[参数]：参数支持[全部、周x、早八、课程名]\n- 查看课程提醒：查看当前已经添加的课程提醒"
 
 
 __plugin_meta__ = PluginMetadata(
     name="小爱课表",
-    description="一键导入课表、查看课表、提醒上课、查询课程",
+    description="一键导入课表、查看课表、提醒上课、查询课程，使用/课表帮助查看指令列表",
     usage=__ai_timetable__usage__,
     type="application",
     homepage="https://github.com/maoxig/nonebot-plugin-ai-timetable",
@@ -54,7 +55,7 @@ update_offline_table = on_command(
     "更新课表", priority=20, block=False, aliases={"更新本地课表"}
 )
 query_table = on_command(
-    "课表查询", aliases={"查询课表", "查课表"}, priority=20, block=False
+    "课表查询", aliases={"查询课表","查询课程", "课程查询"}, priority=20, block=False
 )
 
 
@@ -92,6 +93,13 @@ async def _(event: Event, key: str = ArgPlainText()):
     logger.debug("获取的链接：" + key)
     await update_table(uid, key)
     await new_table.finish("导入成功")
+
+
+@update_offline_table.handle(parameterless=[Depends(check_user)])
+async def _(event: Event):
+    uid = event.get_user_id()
+    await update_offline_table_by_uid(uid)
+    await update_offline_table.finish("更新成功")
 
 
 @query_table.handle(parameterless=[Depends(check_user)])
@@ -161,7 +169,7 @@ async def _(bot: Bot, matcher: Matcher, event: Event, key: str = ArgPlainText())
     matcher.set_arg("text", key)
     logger.debug("提醒参数：" + key)
     uid = event.get_user_id()
-    msg = await remove_reminders(uid, key, bot, event)
+    msg = await remove_reminders(uid, key)
     await remove_reminder.finish(msg)
 
 

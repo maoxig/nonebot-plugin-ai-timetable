@@ -1,6 +1,5 @@
 from nonebot_plugin_orm import Model
 from sqlalchemy import (
-    String,
     TEXT,
     ForeignKey,
     Integer,

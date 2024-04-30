@@ -23,7 +23,7 @@
 ## 💿安装
 
 1. 通过`pip`或`nb`安装；
-    - 使用nb(极度推荐)
+    - 使用nb(推荐)
   
        在机器人目录下命令行使用`nb plugin install nonebot_plugin_ai_timetable`
 
@@ -33,13 +33,15 @@
 
       然后在机器人`pyproject.toml`里的`plugins = []`列表追加`"nonebot_plugin_ai_timetable"`
 
-2. 本地数据保存在`data/ai_timetable/userdata.json`以及`data/ai_timetable/usertable.json`，分别对应用户发送的链接和本地保存的课表
+2. 数据存储使用[plugin-orm](https://github.com/nonebot/plugin-orm), 接入数据库，方便管理
+
+3. 第一次使用使用[plugin-orm](https://github.com/nonebot/plugin-orm)时，需要用`nb orm upgrade`升级数据库
 
 ## 📖简介
 
 1. 傻瓜式一键导入小爱课表，让你的bot实现小爱课表的功能
 
-2. 用户课表数据隔离，无需担心课程时间冲突、不同学校课表不同等问题
+2. 用户课表数据隔离，基于[plugin-rom](https://github.com/nonebot/plugin-orm), 接入数据库，无需担心课程时间冲突、不同学校课表不同等问题
 
 3. 适配多平台，即使是电报涩涩群也要好好学习！🥵🥵
 
@@ -55,16 +57,27 @@
 |   TIMETABLE_SEND_TIME   | float |   0.5   |   TIMETABLE_SEND_TIME=1    | 订阅课程提前发送的时间，单位是`小时`，可以是整数也可以是小数，建议不要设的太大，避免出现无法预料的bug |
 
 ## 💿依赖
-
+插件依赖会在安装时自动安装，如果安装失败，你可以按照以下指令手动再次安装
 ```python
 nb plugin install nonebot_plugin_htmlrender
 nb plugin install nonebot_plugin_apscheduler
 nb plugin install nonebot_plugin_alconna
+nb plugin install nonebot_plugin_orm
 ```
+
 ## 🌙更新日志
 
 <details>
 <summary>点击展开</summary>
+
+- 0.4.0 / 2024-04-30:
+   1. 重构完成，将所有数据迁移到官方数据库插件[plugin-orm](https://github.com/nonebot/plugin-orm)
+   2. 修改了插件触发逻辑
+   3. 重构所有代码，优化处理逻辑
+
+- 0.3.8 / 2024-04-28:
+   1. 修复设置错误
+   2. 重构代码
 
 - 0.3.7 / 2024-04-24:
    1. 更新Nonebot2版本至2.2.0
@@ -129,7 +142,7 @@ nb plugin install nonebot_plugin_alconna
 
 ## 🎉命令
 
-1. 我的课表|小爱课表|本周课表|下周课表：获取本周|下周的完全课表，使用前须先导入课表，这里的课表是在线课表
+1. 课表帮助：获取本条帮助
 
 2. 导入课表：需要有小爱课表分享出来的链接，打开小爱课程表，手动添加课程或从教务导入(已适配了大部分高校)课程后
 
@@ -139,27 +152,23 @@ nb plugin install nonebot_plugin_alconna
 
 3. 更新课表；如果在小爱课程表里修改了课程，发送该条指令即可更新本地的课表，无需重新导入
   
-4. (昨天|今天|明天|后天|周X|星期x|)(课表|有啥课|上啥课)：查询指定天的课表，其中查询周x课表查询的是本周的
+4. 查询课表+[参数]：查询[参数]的课表，参数支持[本周/下周、周x、昨天/今天/明天/后天、早八、课程名]
 
-5. 订阅|取消订阅某天课表：导入本地课表后，发送订阅xx课表，如`订阅周一课表`，就可以在这天的前一天晚上10点(可修改)定时推送第二天要上的课
+5. 添加课程提醒+[参数]：参数支持[周x、早八、课程名]
 
-6. 订阅|取消订阅早八：会让bot在前一天晚上9点(可修改)提醒你第二天是否有早八，以便决定今晚是否嗨皮（判定依据是是否存在第一节课）
+6. 删除课程提醒+[参数]：参数支持[全部、周x、早八、课程名]
 
-7. 订阅|取消订阅课程 xxx：订阅课程后，会让bot在所有名称里包含xxx的课程开始前0.5小时(可修改)发送提醒，如订阅课程 数学分析，则数学分析和数学分析习题课的课前0.5小时会自动发出提醒
+7. 查看课程提醒：查看当前已经添加的课程提醒
 
-8. 上课|下节课：获取当前上课信息，返回下节课信息(如果有)
-
-9. 早八|明日早八：查询明天的早八
-
-10. 课表帮助：获取课表帮助
-
-未完待续
 
 ## ⭐效果图
 
-![Image text](https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/resource/my_table.jpg)
-![Image text](https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/resource/alock_8.jpg)
-![Image text](https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/resource/next_class.jpg)
+![Image text](https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/resource/update.png)
+![Image text](https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/resource/query.png)
+![Image text](https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/resource/query1.png)
+![Image text](https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/resource/query1.png)
+![Image text](https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/resource/reminder.png)
+![Image text](https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/resource/reminder1.png)
 ![Image text](https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/resource/someday_classes.jpg)
 ![Image text](https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/resource/someday_classes_pic.jpg)
 
@@ -167,6 +176,7 @@ nb plugin install nonebot_plugin_alconna
 
 如下图
 
+- 第一次使用本插件时，需要用`nb orm upgrade`升级数据库
 - 首先要登录上小米账户,否则可能获取到错误的课表信息 [#1](https://github.com/maoxig/nonebot-plugin-ai-timetable/issues/1)
 - 设置好开始上课时间
 - 设置好课程时间，可以修改每节课具体的时间，
@@ -191,9 +201,9 @@ nb plugin install nonebot_plugin_alconna
 
 - [x] 多平台适配, 基于 [nonebot-plugin-alconna](https://github.com/nonebot/plugin-alconna) 
 
-- [ ] 支持定时任务本地存储
+- [x] 支持定时任务本地存储
 
-- [ ] 适配[plugin-rom](https://github.com/nonebot/plugin-orm), 接入数据库
+- [x] 适配[plugin-orm](https://github.com/nonebot/plugin-orm), 接入数据库
 
 - [ ] 适配更多课表、脱离小爱课表
 
@@ -201,8 +211,15 @@ nb plugin install nonebot_plugin_alconna
 
 ## 🐛存在的问题
 
- 1. 小爱课表分享的链接大概2周后会过期，会使得`我的课表\下周课表`无法使用，需要重新分享，但是仍能使用本地课表，也可以更新本地课表
+ ### 关于定时任务的持久化存储问题：
 
- 2. 机器人重启后定时任务会丢失
+众所周知，使用apscheduler添加的定时任务，会在bot重启后丢失，这是因为使用[nonebot-plugin-apscheduler](https://github.com/nonebot/plugin-apscheduler)创建出来的scheduler，默认使用的JobStore(即保存任务的方式)，是MemoryJobStore，也就是存在内存中，因此会导致重启丢任务。
+
+因此参考[apscheduler](https://apscheduler.readthedocs.io/en/latest/userguide.html#configuring-the-scheduler)，你可以在bot的配置文件中添加配置项，让[nonebot-plugin-apscheduler](https://github.com/nonebot/plugin-apscheduler)创建出来的scheduler的默认 JobStore 改为使用数据库，这样就可以持久化存储任务，而不需要额外修改任何东西。
+
+然而，很不幸的是，在apscheduler4.0版本之前，所支持的数据库类JobStore都是使用**同步**引擎的，然而[plugin-orm](https://github.com/nonebot/plugin-orm)所采用的是异步引擎，因此你暂时还不能这样做。
+
+所以，暂时还无法解决定时任务的持久化存储问题，除非apscheduler正式发版4.0（目前还是alpha版本），你可以再等待，本插件会持续跟进更新。
+
 
 ## 喜欢的话就点个star✨吧QAQ
