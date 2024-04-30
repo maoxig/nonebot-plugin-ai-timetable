@@ -81,7 +81,7 @@ async def remove_reminders(uid: str, key: str):
             if job.id.split(",") and len(job.id.split(","))==2 and "早八" in job.id.split(",")[1]:
                 count += 1
                 scheduler.remove_job(job_id=job.id)
-        return f"成功移除了{i}个提醒"
+        return f"成功移除了{count}个提醒"
     elif key == "全部":
         scheduler.remove_all_jobs()
         return "成功移除了全部提醒"
@@ -111,6 +111,7 @@ async def add_reminder_for_day(uid: str, day: int, bot: Bot, event: Event) -> Li
     send_day = (job_day-1) % 7
     cron = CronTrigger(
         hour=config.timetable_alock_someday,
+        minute=0,
         second=random.randint(0, 59),
         day_of_week=send_day,
     )
@@ -146,10 +147,11 @@ async def add_reminder_for_morning(uid: str, bot: Bot, event: Event) -> List[Job
         kwargs = {"bot": bot, "event": event, "course_msg": course_msg}
         cron = CronTrigger(
             hour=config.timetable_alock_8,
+            minute=0,
             second=random.randint(0, 59),
             day_of_week=sending_day,
         )
-        #logger.debug(job_id+course_msg)
+        # logger.debug(job_id+course_msg)
         job = scheduler.add_job(
             func=send_reminder,
             trigger=cron,
