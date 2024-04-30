@@ -9,8 +9,8 @@ packages = [{include = "nonebot_plugin_ai_timetable"}]
 [tool.poetry.dependencies]
 python = "^3.8"
 nonebot2 = "^2.2.0"
-nonebot-plugin-apscheduler = "^0.2.0"
-nonebot-plugin-htmlrender="^0.2.0"
+nonebot-plugin-apscheduler = ">=0.2.0,<1.0.0"
+nonebot-plugin-htmlrender="^0.3.0"
 nonebot-plugin-alconna = ">=0.40.1,<1.0.0"
 nonebot-plugin-orm= ">=0.7.1"
 httpx = ">=0.20.0,<1.0.0"
