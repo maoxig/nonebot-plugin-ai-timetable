@@ -110,30 +110,40 @@ async def update_table(uid: str, url: str):
         await add_user(uid, url, __response_url__, user_data)
 
 
-async def build_table(uid: str, key: str):
+async def build_table(uid: str, key: str) -> Union[bytes, str]:
+    """根据用户信息和参数，分发不同的处理函数，根据返回的列表进行处理，返回字符串或图片"""
     key = key.strip()
+    courses = []
+    user = await query_user_by_uid(uid)
     if re.match(__day_pattern__, key):
         day = weekday_int(
             key
         )  ##day是1-7的整数，但是也有可能是负数和大于7的数，用于判断周数
-        return await build_table_for_day(uid, day)
+        courses = await build_table_for_day(uid, day)
     elif key == "本周":
         return await build_table_for_current_week(uid)
     elif key == "下周":
         return await build_table_for_next_week(uid)
     elif key == "早八":
-        return await build_table_for_morning(uid)
+        courses = await build_table_for_morning(uid)
+        if not courses:
+            return "你明天没有早八呢，好好休息吧"
     elif key == "下节课":
-        return await build_table_for_next_course(uid)
+        current_courses = await build_table_current_course(uid)
+        current_msg = await build_table_by_courses_list(current_courses, user)
+        next_courses = await build_table_for_next_course(uid)
+        next_msg = await build_table_by_courses_list(next_courses, user)
+        return f"- 当前的课程信息：\n\n {current_msg if current_courses else '当前没有课程呢'} \n\n- 下节课程信息：\n\n{next_msg if next_courses else '今天接下来没有课了呢'}"
     else:
-        return "参数匹配失败"
+        courses = await build_table_for_some_course(uid, key)
+    course_msg = await build_table_by_courses_list(courses, user)
+    return course_msg
 
 
-async def build_table_for_day(uid: str, day: int):
+async def build_table_for_day(uid: str, day: int) -> List[Course]:
     """构造某日课表信息"""
     courses = await query_course_by_day(uid, day)
     week = await get_current_week(uid, day)
-    user = await query_user_by_uid(uid)
     if day < 0:
         day += 7
         week -= 1
@@ -141,8 +151,8 @@ async def build_table_for_day(uid: str, day: int):
         day -= 7
         week += 1
     courses = [course for course in courses if str(week) in course.weeks.split(",")]
-    courses_msg = await build_table_by_courses_list(courses, user)
-    return courses_msg
+
+    return courses
 
 
 async def build_table_for_current_week(uid: str) -> bytes:
@@ -172,7 +182,8 @@ async def build_table_for_next_week(uid: str) -> bytes:
         return pic
 
 
-async def build_table_for_next_course(uid: str):
+async def build_table_for_next_course(uid: str) -> List[Course]:
+    """获取下节课的课程列表"""
     day = weekday_int("今")
     courses = await query_course_by_day(uid, day)
     week = await get_current_week(uid, day)
@@ -185,9 +196,8 @@ async def build_table_for_next_course(uid: str):
         and eval(user.sectionTimes)[int(course.sections.split(",")[0]) - 1]["s"]
         > now_time
     ]
-    if not courses:
-        return "\n你今天接下来没有课了呢,好好休息吧"
-    return await build_table_by_courses_list(courses, user)
+
+    return courses
 
 
 async def build_table_by_course(course: Course, user: User) -> str:
@@ -197,30 +207,27 @@ async def build_table_by_course(course: Course, user: User) -> str:
     endsection = int(sections[-1])
     starttime = eval(user.sectionTimes)[startsection - 1]["s"]
     endtime = eval(user.sectionTimes)[endsection - 1]["e"]
-    msg = f"|{starttime}-{endtime}|{course.name}|{course.position}|{course.teacher}|"
+    msg = f"|{course.day}|{starttime}-{endtime}|{course.name}|{course.position}|{course.teacher}|"
     return msg
 
 
 async def build_table_by_courses_list(courses: List[Course], user: User) -> str:
     """根据一个课程列表，构建一个md表格形式的课程表，带表头信息"""
-    msg = "|时间|课程|地点|老师|\n| :-----| :----: | :----: | :----: |:----: |\n"
+    msg = "|星期|时间|课程|地点|老师|\n| :----:| :----:| :----: | :----: | :----:|\n"
     for course in courses:
         course_msg = await build_table_by_course(course, user)
         msg += f"{course_msg}\n"
     return msg
 
 
-async def build_table_for_some_course(uid: str, key: str):
-    """根据用户查询的课程名，返回一系列的课程表"""
+async def build_table_for_some_course(uid: str, key: str) -> List[Course]:
+    """根据用户查询的课程名，返回一系列的课程"""
     courses = await query_course_by_name(uid, key)
-    user = await query_user_by_uid(uid)
-
-    courses_msg = await build_table_by_courses_list(courses, user)
-    return courses_msg
+    return courses
 
 
-async def build_table_for_morning(uid: str):
-    """为用户构建出第二天早八的相关信息"""
+async def build_table_for_morning(uid: str) -> List[Course]:
+    """为用户构建出第二天早八的所有课程"""
     day = weekday_int("明")
     courses = await query_course_by_day(uid, day)
     week = await get_current_week(uid, day)
@@ -238,12 +245,11 @@ async def build_table_for_morning(uid: str):
         and str(week) in course.weeks.split(",")
         and "1" in course.sections.split(",")
     ]  # 从当天的课中选出当周的
-    if not courses:
-        return "你明天没有早八呢！享受夜生活吧！"
-    return await build_table_by_courses_list(courses,user)
+    return courses
 
-async def build_table_current_course(uid: str):
-    """获取现在的课程信息"""
+
+async def build_table_current_course(uid: str) -> List[Course]:
+    """获取现在的课程，返回列表"""
     day = weekday_int("今")
     courses = await query_course_by_day(uid, day)
     week = await get_current_week(uid, day)
@@ -257,13 +263,11 @@ async def build_table_current_course(uid: str):
     for course_time in eval(user.sectionTimes):
         if course_time["s"] < now_time < course_time["e"]:
             now_section = course_time["i"]
-    if not now_section:
-        return "你现在没有课呢, 空闲时间好好休息吧"
+
     courses = [
         course for course in courses if str(now_section) in course.sections.split(",")
     ]  # 从剩下的课中选出本节的
-    course_msg = await build_table_by_courses_list(courses, user)
-    return course_msg
+    return courses
 
 
 async def send_table(matcher: Matcher, table: Union[str, bytes]):
