@@ -71,9 +71,10 @@ nb plugin install nonebot_plugin_orm
 <summary>点击展开</summary>
 
 - 0.4.0 / 2024-04-30:
-   1. 重构完成，将所有数据迁移到官方数据库插件[plugin-orm](https://github.com/nonebot/plugin-orm)
-   2. 修改了插件触发逻辑
+   1. 重构完成，将所有数据迁移到官方数据库插件[plugin-orm](https://github.com/nonebot/plugin-orm)，之前的数据失效
+   2. 修改了插件触发指令和相关逻辑
    3. 重构所有代码，优化处理逻辑
+   >该版本是破坏性更新，且仍在测试中，有任何疑问欢迎issue或pr
 
 - 0.3.8 / 2024-04-28:
    1. 修复设置错误
