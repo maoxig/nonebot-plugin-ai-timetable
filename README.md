@@ -1,24 +1,24 @@
-<p align="center">
-  <a href="https://nonebot.dev/"><img src="https://nonebot.dev/logo.png" width="200" height="200" alt="nonebot"></a>
-</p>
 <div align="center">
+  <a href="https://nonebot.dev/">
+    <img src="https://nonebot.dev/logo.png" width="200" height="200" alt="nonebot">
+  </a>
 
 # nonebot-plugin-ai-timetable
 
-✨*基于Nonebot2的对接小爱课程表的插件*✨
-  
-<a href="https://github.com/nonebot/nonebot2">
-  <img src="https://img.shields.io/badge/nonebot-v2-red" alt="nonebot">
-</a> 
-<a href="./LICENSE">
-    <img src="https://img.shields.io/github/license/maoxig/nonebot-plugin-ai-timetable" alt="license">
-</a>
-<a href="https://pypi.python.org/pypi/nonebot-plugin-ai-timetable">
-    <img src="https://img.shields.io/pypi/v/nonebot-plugin-ai-timetable" alt="pypi">
-</a>
-<img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="python">
+✨ *基于Nonebot2的对接小爱课程表的插件* ✨
 
-<div align="left">
+
+  <a href="https://github.com/nonebot/nonebot2">
+    <img src="https://img.shields.io/badge/nonebot-v2-red" alt="nonebot">
+  </a>
+  <a href="./LICENSE">
+    <img src="https://img.shields.io/github/license/maoxig/nonebot-plugin-ai-timetable" alt="license">
+  </a>
+  <a href="https://pypi.python.org/pypi/nonebot-plugin-ai-timetable">
+    <img src="https://img.shields.io/pypi/v/nonebot-plugin-ai-timetable" alt="pypi">
+  </a>
+  <img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="python">
+</div>
 
 ## 💿安装
 
@@ -39,9 +39,8 @@
 
 2. 数据存储使用[plugin-orm](https://github.com/nonebot/plugin-orm), 使用`nb orm upgrade`升级数据库
 
->[!WARNING] 注意
-第一次使用[plugin-orm](https://github.com/nonebot/plugin-orm)，或者插件定义的模型有所更新时，需要用`nb orm upgrade`升级数据库
-
+> [!WARNING]
+> 第一次使用[plugin-orm](https://github.com/nonebot/plugin-orm)，或者插件定义的模型有所更新时，需要用`nb orm upgrade`升级数据库
 
 ## 📖简介
 
@@ -66,8 +65,8 @@
 
 ## 💿依赖
 
->[!NOTE]
-插件依赖会在安装时自动安装，如果安装失败，你可以按照以下指令手动再次安装
+> [!NOTE]
+> 插件依赖会在安装时自动安装，如果安装失败，你可以按照以下指令手动再次安装
 
 ```python
 nb plugin install nonebot_plugin_htmlrender
@@ -161,8 +160,9 @@ nb plugin install nonebot_plugin_orm
     ![Image text](https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/resource/export.jpg)
 
     在基本设置里把开始上课时间等调整好之后(尤其是时间、节数)，把分享课表得到的链接发送给bot即可导入本地
-    >[!WARNING] 为什么显示了错误的课表
-    因为在分享前，你需要登录小米账户 [#1](https://github.com/maoxig/nonebot-plugin-ai-timetable/issues/1)
+
+> [!NOTE]
+> 在分享前，你需要登录小米账户 [#1](https://github.com/maoxig/nonebot-plugin-ai-timetable/issues/1)
 
 - 更新课表；如果在小爱课程表里修改了课程，发送该条指令即可更新本地的课表，无需重新导入
   
@@ -184,7 +184,7 @@ nb plugin install nonebot_plugin_orm
 ![Image text](https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/resource/reminder1.png)
 ![Image text](https://github.com/maoxig/nonebot-plugin-ai-timetable/blob/main/resource/someday_classes_pic.jpg)
 
-### 我不知道怎么使用小爱课程表
+### 😥我不知道怎么使用小爱课程表
 
 如下图
 
@@ -222,8 +222,8 @@ nb plugin install nonebot_plugin_orm
 
 ## 🐛存在的问题
 
->[!NOTE] 关于定时任务的持久化存储问题：
-在当前版本下，Bot重启后会失去之前创建过的任务，这个问题暂时无法解决
+> [!NOTE]
+> 在当前版本下，Bot重启后会失去之前创建过的任务，这个问题暂时无法解决
 
 众所周知，使用apscheduler添加的定时任务，会在bot重启后丢失，这是因为使用[nonebot-plugin-apscheduler](https://github.com/nonebot/plugin-apscheduler)创建出来的`scheduler`，默认使用的`JobStore`(即保存任务的方式)，是`MemoryJobStore`，也就是存在内存中，因此会导致重启丢任务。
 
@@ -241,7 +241,7 @@ nb plugin install nonebot_plugin_orm
 - 感谢[nonebot-plugin-alconna](https://github.com/nonebot/plugin-alconna)
 - 感谢[Matcha](https://github.com/A-kirami/matcha)提供的简单好用的测试平台
 
-### 喜欢的话就点个star✨吧
+### ✨喜欢的话就点个star吧
 
 或者, 你也可以看我写的其他插件
-[nonebot-plugin-manga-translator](https://github.com/maoxig/nonebot-plugin-manga-translator)一个支持多api, 方便好用的图片/漫画翻译插件
+[nonebot-plugin-manga-translator](https://github.com/maoxig/nonebot-plugin-manga-translator)一个支持多api（包括离线部署）、跨平台、方便好用的图片/漫画翻译插件
