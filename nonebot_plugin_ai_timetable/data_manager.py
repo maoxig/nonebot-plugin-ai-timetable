@@ -7,7 +7,7 @@ from sqlalchemy.orm import selectinload
 
 require("nonebot_plugin_orm")
 from nonebot_plugin_orm import get_session
-from typing import List
+from typing import List,Union
 from .model import User, Course
 import time
 
@@ -22,6 +22,7 @@ async def add_user(user_id: str, base_url: str, response_url: str, user_data: di
         user_orm.base_url = base_url
         user_orm.response_url = response_url
         # 设置类的属性
+
         for key, value in user_data.items():
             if hasattr(User, key) and key != "courses":
                 setattr(user_orm, key, value)
@@ -84,12 +85,12 @@ async def remove_user(user_id: str):
             # 删除用户的所有课程
             user_orm.courses.clear()
             # 删除用户对象
-            session.delete(user_orm)
+            await session.delete(user_orm)
             # 提交更改
             await session.commit()
 
 
-async def query_user_by_uid(user_id: str) -> User:
+async def query_user_by_uid(user_id: str) -> Union [User,None]:
     """从数据库获取某个用户信息，只含信息，不含课表"""
     async with get_session() as session:
         query = select(User).filter(User.user_id == user_id)
