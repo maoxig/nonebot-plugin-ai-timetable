@@ -7,7 +7,7 @@ from sqlalchemy.orm import selectinload
 
 require("nonebot_plugin_orm")
 from nonebot_plugin_orm import get_session
-from typing import List,Union
+from typing import List, Union
 from .model import User, Course
 import time
 
@@ -90,12 +90,15 @@ async def remove_user(user_id: str):
             await session.commit()
 
 
-async def query_user_by_uid(user_id: str) -> Union [User,None]:
+async def query_user_by_uid(user_id: str) -> User:
     """从数据库获取某个用户信息，只含信息，不含课表"""
     async with get_session() as session:
         query = select(User).filter(User.user_id == user_id)
         result = await session.execute(query)
         result = result.scalar()
+        if not result:
+            logger.warning("用户不在数据库中")
+            raise ValueError("用户信息不存在于数据库中") 
     return result
 
 

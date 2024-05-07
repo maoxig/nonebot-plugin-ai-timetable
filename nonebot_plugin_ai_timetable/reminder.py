@@ -10,14 +10,7 @@ require("nonebot_plugin_apscheduler")
 require("nonebot_plugin_alconna")
 from nonebot_plugin_alconna import UniMessage
 from nonebot.exception import ActionFailed
-
-try:
-    from nonebot_plugin_apscheduler import scheduler
-except ImportError:
-    logger.opt(colors=True).info(
-        "未检测到软依赖<y>nonebot_plugin_apscheduler</y>,<r>禁用定时任务功能</r>"
-    )
-    scheduler = None
+from nonebot_plugin_apscheduler import scheduler
 from apscheduler.job import Job
 from apscheduler.triggers.cron import CronTrigger
 from datetime import datetime,timedelta

@@ -3,7 +3,7 @@ import httpx
 from datetime import datetime
 from typing import Union
 from nonebot.matcher import Matcher
-from nonebot import require, get_plugin_config
+from nonebot import require, get_plugin_config,logger
 from nonebot.adapters import Message, Event, Bot
 
 from nonebot_plugin_ai_timetable.data_manager import weekday_int
@@ -46,7 +46,7 @@ __day_pattern__ = r"((星期|周)([一二三四五六日1-7]))|((今|明|昨|后
 """
 
 
-async def check_user(event: Event, matcher: Matcher) -> Event:
+async def check_user(event: Event, matcher: Matcher):
     """检查用户是否在课表系统中"""
     if not await check_user_in_table(event.get_user_id()):
         await matcher.finish("你还没有导入课表，发送/导入课表来导入吧！")
@@ -78,23 +78,29 @@ async def get_user_data(base_url: str) -> dict:
         )
         await page.goto(url=base_url, wait_until="networkidle")
         if __response_url__:
-            async with httpx.AsyncClient() as client:
-                res = await client.get(__response_url__, headers=__headers__)
-            return res.json()["data"]
-
+            try:
+                async with httpx.AsyncClient() as client:
+                    res = await client.get(__response_url__, headers=__headers__)
+                return res.json()["data"]
+            except Exception as e:
+                logger.error(f"{e},res_url:{__response_url__}")
+        return {}
 
 async def update_table(uid: str, url: str):
     """导入课表，存在|不存在该用户"""
     user_data = await get_user_data(url)
+    if not __response_url__:
+        raise RuntimeError("没有监听到响应url")
     if await check_user_in_table(uid):
         await update_user(uid, url, __response_url__, user_data)
     else:
         await add_user(uid, url, __response_url__, user_data)
 
-async def update_offline_table_by_uid(uid:str):
+
+async def update_offline_table_by_uid(uid: str):
     user = await query_user_by_uid(uid)
-    base_url=user.base_url
-    await update_table(uid,base_url)
+    base_url = user.base_url
+    await update_table(uid, base_url)
 
 
 async def build_table(uid: str, key: str) -> Union[bytes, str]:
@@ -114,13 +120,13 @@ async def build_table(uid: str, key: str) -> Union[bytes, str]:
     elif key == "早八":
         courses = await get_courses_for_morning(uid)
         if not courses:
-            return "你明天没有早八呢，好好休息吧"
+            return "你明天没有早八，好好休息吧"
     elif key == "下节课":
         current_courses = await get_courses_for_current_course(uid)
         current_msg = await build_table_by_courses_list(current_courses, user)
         next_courses = await get_courses_for_next_course(uid)
         next_msg = await build_table_by_courses_list(next_courses, user)
-        return f"- 当前的课程信息：\n\n {current_msg if current_courses else '当前没有课程呢'} \n\n- 下节课程信息：\n\n{next_msg if next_courses else '今天接下来没有课了呢'}"
+        return f"- 当前的课程信息：\n\n {current_msg if current_courses else '当前没有课程'} \n\n- 下节课程信息：\n\n{next_msg if next_courses else '今天接下来没有课了'}"
     else:
         courses = await get_courses_by_name(uid, key)
     course_msg = await build_table_by_courses_list(courses, user)
@@ -149,9 +155,9 @@ async def build_table_by_courses_list(courses: List[Course], user: User) -> str:
 
 async def build_table_for_current_week(uid: str) -> bytes:
     """获取本周课表，以后考虑通过本地生成"""
-    user_data = await query_user_by_uid(uid)
+    user = await query_user_by_uid(uid)
     async with get_new_page(viewport={"width": 1000, "height": 1000}) as page:
-        await page.goto(user_data.base_url, wait_until="networkidle")
+        await page.goto(user.base_url, wait_until="networkidle")
         await page.evaluate(
             'var t = document.querySelector("#root>div>div.importSchedule___UjEKt>div.footer___1iAis.toUp___2mciB"); t.style.display = "none"'
         )
@@ -161,9 +167,9 @@ async def build_table_for_current_week(uid: str) -> bytes:
 
 async def build_table_for_next_week(uid: str) -> bytes:
     """获取本周课表，以后考虑通过本地生成"""
-    user_data = await query_user_by_uid(uid)
+    user = await query_user_by_uid(uid)
     async with get_new_page(viewport={"width": 1000, "height": 1000}) as page:
-        await page.goto(user_data.base_url, wait_until="networkidle")
+        await page.goto(user.base_url, wait_until="networkidle")
         await page.evaluate(
             'var t = document.querySelector("#root>div>div.importSchedule___UjEKt>div.footer___1iAis.toUp___2mciB"); t.style.display = "none"'
         )
@@ -218,14 +224,13 @@ async def get_courses_for_morning(uid: str) -> List[Course]:
     week = await get_current_week(uid, day)
     if day < 0:
         day += 7
-    elif day > 7: 
+    elif day > 7:
         day -= 7
     courses = await query_course_by_day(uid, day)
     courses = [
         course
         for course in courses
-        if str(week) in course.weeks.split(",")
-        and "1" in course.sections.split(",")
+        if str(week) in course.weeks.split(",") and "1" in course.sections.split(",")
     ]  # 从当天的课中选出当周的
     return courses
 
