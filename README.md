@@ -20,6 +20,8 @@
   <img src="https://img.shields.io/badge/python-3.8+-blue.svg" alt="python">
 </div>
 
+## **由于小爱课程表的导出链接已经较长时间无法使用，本仓库功能基本无法使用，因此归档**
+
 ## 💿安装
 
 1. 通过`pip`或`nb`安装；
